@@ -10,10 +10,6 @@ on:
       - "**.md"
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: setup
-
 jobs:
   test:
     name: Unit Tests - ${{ matrix.os }}
@@ -27,7 +23,7 @@ jobs:
         with:
           node-version: "16"
           cache: "npm"
-          cache-dependency-path: setup/package-lock.json
+          cache-dependency-path: package-lock.json
       - run: npm ci --prefer-offline --no-audit --progress=false
       - run: npm run bundle
       - run: npm test
@@ -132,7 +128,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ./setup
+      - uses: ./
         with:
           ghc-version: ${{ matrix.plan.ghc }}
           ghcup-release-channel: ${{ matrix.ghcup_release_channel }}
@@ -150,15 +146,15 @@ jobs:
           runghc __tests__/hello.hs
 
       - name: Build test project
-        working-directory: setup/__tests__/project
+        working-directory: __tests__/project
         run: cabal build
 
       - name: Run test project
-        working-directory: setup/__tests__/project
+        working-directory: __tests__/project
         run: cabal run
 
       - name: Install test project
-        working-directory: setup/__tests__/project
+        working-directory: __tests__/project
         run: cabal install
 
       - name: Run installed test project
@@ -167,7 +163,7 @@ jobs:
 
       - name: Build and run test with Hackage dependency
         if:   ${{ matrix.cabal_update != 'false' }}
-        working-directory: setup/__tests__/project-with-hackage-dependency
+        working-directory: __tests__/project-with-hackage-dependency
         run:  cabal build && cabal run
 
       - name: Confirm installed and expected versions match
@@ -192,7 +188,7 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
-      - uses: ./setup
+      - uses: ./
         id: setup
         env:
           RUNNER_DEBUG: "1"
@@ -216,7 +212,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ./setup
+      - uses: ./
         id: setup
         with:
           enable-stack: true
