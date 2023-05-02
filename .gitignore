@@ -1,3 +1,5 @@
-# IntelliJ
-.idea/
-*.iml
+node_modules
+dist-newstyle
+.out
+**/tsbuildinfo
+.eslintcache
