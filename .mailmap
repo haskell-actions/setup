@@ -1,0 +1,46 @@
+# Format of a line:
+#
+# Proper Name <Proper@email> commit name <commit@email>
+# \-----------+------------/ \----------+-------------/
+#             |                         |
+#          replace                     find
+#
+# <Proper@email> is never optional and cannot appear by itself.
+# Besides that, the other parts are optional (as long as 2 parts
+# are present).
+
+# Please keep this file in alphabetic order!
+
+##############################################################################
+
+Alexander Biehl <alexbiehl@gmail.com>
+Andreas Abel <andreas.abel@ifi.lmu.de>
+Andy McKay <andymckay@github.com>
+Anton Latukha <anton.latukha@gmail.com> Anton-Latukha <anton.latukha@gmail.com>
+Ben Simms <ben@bensimms.moe>
+Hazel Weakly <hazel@theweaklys.com> Jared Weakly <jaredweakly@gmail.com>
+Hazel Weakly <hazel@theweaklys.com> Jared Weakly <jweakly@galois.com>
+Hazel Weakly <hazel@theweaklys.com> hazelweakly <hazel@theweaklys.com>
+Hazel Weakly <hazel@theweaklys.com> jared-w <jaredweakly@gmail.com>
+Hécate Moonlight <hecate+github@glitchbra.in> Hécate Moonlight <Kleidukos@users.noreply.github.com>
+Jan Hrcek <2716069+jhrcek@users.noreply.github.com>
+Javier Neira <atreyu.bbb@gmail.com>
+John Ky <john.ky@iohk.io>
+Lisanna Dettwyler <lisanna@galois.com>
+Lucas David Traverso <lucas6246@gmail.com>
+Luis Pedro Coelho <luis@luispedro.org>
+Luke Lau <luke_lau@icloud.com>
+Masahiro Sakai <masahiro.sakai@gmail.com>
+Maxim Lobanov <v-malob@microsoft.com>
+Mihai Maruseac <mihai.maruseac@gmail.com>
+Orestis Melkonian <melkon.or@gmail.com>
+Phil Ruffwind <rf@rufflewind.com>
+Pierre Le Marre <dev@wismill.eu>
+Reto Hablützel <rethab@protonmail.ch>
+Richard Marko <srk@48.io>
+Robert Estelle <robertestelle@gmail.com>
+Ryan Hendrickson <ryan.hendrickson@alum.mit.edu>
+Ryan Scott <ryan.gl.scott@gmail.com>
+Timothy Clem <timothy.clem@gmail.com>
+Wismill <dev@wismill.eu>
+sgadkar2 <123888903+sgadkar2@users.noreply.github.com>
