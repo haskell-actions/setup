@@ -75,7 +75,7 @@ export const yamlInputs: Record<string, {default: string}> = (
 
 export function getDefaults(os: OS): Defaults {
   const mkVersion = (v: string, vs: string[], t: Tool): Version => ({
-    version: resolve(yamlInputs[v].default, vs, t, os, false), // verbose=false: no printout here
+    version: resolve(yamlInputs[v].default || 'latest', vs, t, os, false), // verbose=false: no printout here
     supported: vs
   });
 

@@ -13862,7 +13862,7 @@ exports.yamlInputs = (0, js_yaml_1.load)((0, fs_1.readFileSync)((0, path_1.join)
 ).inputs;
 function getDefaults(os) {
     const mkVersion = (v, vs, t) => ({
-        version: resolve(exports.yamlInputs[v].default, vs, t, os, false),
+        version: resolve(exports.yamlInputs[v].default || 'latest', vs, t, os, false),
         supported: vs
     });
     return {

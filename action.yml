@@ -5,7 +5,6 @@ inputs:
   ghc-version:
     required: false
     description: 'Version of GHC to use. If set to "latest", it will always get the latest stable version. If set to "head", it will always get the latest build of GHC.'
-    default: 'latest'
   cabal-version:
     required: false
     description: 'Version of Cabal to use. If set to "latest", it will always get the latest stable version. If set to "head", it will always get the latest build of cabal.'
@@ -13,10 +12,8 @@ inputs:
   stack-version:
     required: false
     description: 'Version of Stack to use. If set to "latest", it will always get the latest stable version.'
-    default: 'latest'
   enable-stack:
     required: false
-    default: false
     description: 'If set to `true`, will setup default Stack.  Implied by any of `stack-version`, `stack-no-global`, `stack-setup-ghc`.'
   stack-no-global:
     required: false
