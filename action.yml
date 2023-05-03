@@ -1,6 +1,6 @@
 name: 'Setup Haskell'
 description: 'Set up a specific version of GHC and Cabal and add the command-line tools to the PATH'
-author: 'GitHub'
+author: 'Haskell community'
 inputs:
   ghc-version:
     required: false
@@ -16,13 +16,16 @@ inputs:
     default: 'latest'
   enable-stack:
     required: false
-    description: 'If specified, will setup Stack.'
+    default: false
+    description: 'If set to `true`, will setup default Stack.  Implied by any of `stack-version`, `stack-no-global`, `stack-setup-ghc`.'
   stack-no-global:
     required: false
-    description: 'If specified, enable-stack must be set. Prevents installing GHC and Cabal globally.'
+    default: false
+    description: 'If set to `true`, will setup Stack but will not install GHC and Cabal globally.'
   stack-setup-ghc:
     required: false
-    description: 'If specified, enable-stack must be set. Will run stack setup to install the specified GHC.'
+    default: false
+    description: 'If set to `true`, will setup Stack. Will run `stack setup` to install the specified GHC.'
   cabal-update:
     required: false
     default: true
@@ -33,9 +36,14 @@ inputs:
   ghcup-release-channel:
     required: false
     description: "A release channel URL to add to ghcup via `ghcup config add-release-channel`."
+  enable-matcher:
+    required: false
+    default: true
+    description: 'Enable match messages from GHC as GitHub CI annotations.'
   disable-matcher:
     required: false
-    description: 'If specified, disables match messages from GHC as GitHub CI annotations.'
+    default: false
+    description: 'Legacy input, use `enable-matcher` instead.'
 outputs:
   ghc-version:
     description: 'The resolved version of ghc'
