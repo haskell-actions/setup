@@ -1,6 +1,6 @@
-# haskell/actions/setup
+# haskell-actions/setup
 
-[![GitHub Actions status](https://github.com/haskell/actions/workflows/Setup/badge.svg)](https://github.com/haskell/actions)
+[![GitHub Actions status](https://github.com/haskell-actions/setup/actions/workflows/workflow.yml/badge.svg)](https://github.com/haskell-actions/setup/actions/workflows/workflow.yml)
 
 This action sets up a Haskell environment for use in actions by:
 
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest # or macOS-latest, or windows-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: haskell/actions/setup@v2
+      - uses: haskell-actions/setup@v2
       - run: runhaskell Hello.hs
 ```
 
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest # or macOS-latest, or windows-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: haskell/actions/setup@v2
+      - uses: haskell-actions/setup@v2
         with:
           ghc-version: '8.8' # Resolves to the latest point release of GHC 8.8
           cabal-version: '3.0.0.0' # Exact version of Cabal
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest # or macOS-latest, or windows-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: haskell/actions/setup@v2
+      - uses: haskell-actions/setup@v2
         with:
           ghc-version: '8.8.4' # Exact version of ghc to use
           # cabal-version: 'latest'. Omitted, but defaults to 'latest'
@@ -93,7 +93,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Haskell
-        uses: haskell/actions/setup@v2
+        uses: haskell-actions/setup@v2
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
@@ -133,7 +133,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up GHC ${{ matrix.ghc-version }}
-        uses: haskell/actions/setup@v2
+        uses: haskell-actions/setup@v2
         id: setup
         with:
           ghc-version: ${{ matrix.ghc-version }}
