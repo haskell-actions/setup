@@ -16,7 +16,7 @@ export interface ProgramOpt {
 export interface Options {
     ghc: ProgramOpt;
     ghcup: {
-        releaseChannel?: URL;
+        releaseChannel: URL | null;
     };
     cabal: ProgramOpt & {
         update: boolean;
@@ -85,6 +85,6 @@ export declare function releaseRevision(version: string, tool: Tool, os: OS): st
  * @returns   boolean
  */
 export declare function parseYAMLBoolean(name: string, val: string): boolean;
-export declare function parseURL(name: string, val: string): URL | undefined;
+export declare function parseURL(name: string, val: string): URL | null;
 export declare function getOpts({ ghc, cabal, stack }: Defaults, os: OS, inputs: Record<string, string>): Options;
 export {};

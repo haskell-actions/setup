@@ -13276,6 +13276,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const exec_1 = __nccwpck_require__(1514);
 const io_1 = __nccwpck_require__(7436);
 const tc = __importStar(__nccwpck_require__(7784));
+const child_process = __importStar(__nccwpck_require__(2081));
 const fs_1 = __nccwpck_require__(7147);
 const path_1 = __nccwpck_require__(1017);
 const opts_1 = __nccwpck_require__(8131);
@@ -13298,7 +13299,25 @@ async function configureOutputs(tool, version, path, os) {
         if (os === 'win32')
             core.exportVariable('STACK_ROOT', sr);
     }
-    core.setOutput(`${tool}-version`, version);
+    // can't put this in resolve() because it might run before ghcup is installed
+    let resolvedVersion = version;
+    if (version === 'latest-nightly') {
+        try {
+            const ghcupExe = await ghcupBin(os);
+            const out = await new Promise((resolve, reject) => child_process.execFile(ghcupExe, ['list', '-nr'], { encoding: 'utf-8' }, (error, stdout) => (error ? reject(error) : resolve(stdout))));
+            resolvedVersion =
+                out
+                    .split('\n')
+                    .map(line => line.split(' '))
+                    .filter(line => line[2] === 'latest-nightly')
+                    .map(line => line[1])
+                    .at(0) ?? version;
+        }
+        catch (error) {
+            // swallow failures, just leave version as 'latest-nightly'
+        }
+    }
+    core.setOutput(`${tool}-version`, resolvedVersion);
 }
 async function success(tool, version, path, os) {
     core.addPath(path);
@@ -13400,12 +13419,14 @@ async function installTool(tool, version, os) {
     }
     switch (os) {
         case 'linux':
-            if (tool === 'ghc' && (0, compare_versions_1.compareVersions)('8.3', version)) {
-                // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
-                // Atm, I do not know how to check whether we are on ubuntu-20.04.
-                // So, ignore the error.
-                // if (!(await aptLibCurses5())) break;
-                await aptLibNCurses5();
+            if (tool === 'ghc') {
+                if (version !== 'latest-nightly' && (0, compare_versions_1.compareVersions)('8.3', version)) {
+                    // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
+                    // Atm, I do not know how to check whether we are on ubuntu-20.04.
+                    // So, ignore the error.
+                    // if (!(await aptLibCurses5())) break;
+                    await aptLibNCurses5();
+                }
             }
             await ghcup(tool, version, os);
             if (await isInstalled(tool, version, os))
@@ -13862,8 +13883,18 @@ async function run(inputs) {
         core.debug(`run: inputs = ${JSON.stringify(inputs)}`);
         core.debug(`run: os     = ${JSON.stringify(os)}`);
         core.debug(`run: opts   = ${JSON.stringify(opts)}`);
-        if (opts.ghcup.releaseChannel) {
-            await core.group(`Preparing ghcup environment`, async () => (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel, os));
+        const releaseChannels = [
+            opts.ghcup.releaseChannel,
+            opts.ghc.raw === 'latest-nightly'
+                ? new URL('https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml')
+                : null
+        ].filter((v) => v !== null);
+        if (releaseChannels.length > 0) {
+            await core.group(`Setting release channels`, async () => {
+                for (const channel of releaseChannels) {
+                    await (0, installer_1.addGhcupReleaseChannel)(channel, os);
+                }
+            });
         }
         for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable)) {
             await core.group(`Preparing ${t} environment`, async () => (0, installer_1.resetTool)(t, resolved, os));
