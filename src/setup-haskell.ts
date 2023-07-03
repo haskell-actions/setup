@@ -30,10 +30,20 @@ export default async function run(
     core.debug(`run: os     = ${JSON.stringify(os)}`);
     core.debug(`run: opts   = ${JSON.stringify(opts)}`);
 
-    if (opts.ghcup.releaseChannel) {
-      await core.group(`Preparing ghcup environment`, async () =>
-        addGhcupReleaseChannel(opts.ghcup.releaseChannel!, os)
-      );
+    const releaseChannels = [
+      opts.ghcup.releaseChannel,
+      opts.ghc.raw === 'latest-nightly'
+        ? new URL(
+            'https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml'
+          )
+        : null
+    ].filter((v): v is URL => v !== null);
+    if (releaseChannels.length > 0) {
+      await core.group(`Setting release channels`, async () => {
+        for (const channel of releaseChannels) {
+          await addGhcupReleaseChannel(channel, os);
+        }
+      });
     }
 
     for (const [t, {resolved}] of Object.entries(opts).filter(

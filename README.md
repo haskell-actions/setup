@@ -236,6 +236,7 @@ E.g., `8.10` will be resolved to `8.10.7`, and so will `8`.
 
 **GHC:**
 
+- `latest-nightly`
 - `latest` (default)
 - `9.6.2` `9.6`
 - `9.6.1`

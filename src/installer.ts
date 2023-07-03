@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import {exec as e} from '@actions/exec';
 import {which} from '@actions/io';
 import * as tc from '@actions/tool-cache';
+import * as child_process from 'child_process';
 import {promises as afs} from 'fs';
 import {join, dirname} from 'path';
 import {ghcup_version, OS, Tool, releaseRevision} from './opts';
@@ -33,7 +34,32 @@ async function configureOutputs(
     core.setOutput('stack-root', sr);
     if (os === 'win32') core.exportVariable('STACK_ROOT', sr);
   }
-  core.setOutput(`${tool}-version`, version);
+
+  // can't put this in resolve() because it might run before ghcup is installed
+  let resolvedVersion = version;
+  if (version === 'latest-nightly') {
+    try {
+      const ghcupExe = await ghcupBin(os);
+      const out = await new Promise<string>((resolve, reject) =>
+        child_process.execFile(
+          ghcupExe,
+          ['list', '-nr'],
+          {encoding: 'utf-8'},
+          (error, stdout) => (error ? reject(error) : resolve(stdout))
+        )
+      );
+      resolvedVersion =
+        out
+          .split('\n')
+          .map(line => line.split(' '))
+          .filter(line => line[2] === 'latest-nightly')
+          .map(line => line[1])
+          .at(0) ?? version;
+    } catch (error) {
+      // swallow failures, just leave version as 'latest-nightly'
+    }
+  }
+  core.setOutput(`${tool}-version`, resolvedVersion);
 }
 
 async function success(
@@ -165,12 +191,14 @@ export async function installTool(
 
   switch (os) {
     case 'linux':
-      if (tool === 'ghc' && compareVersions('8.3', version)) {
-        // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
-        // Atm, I do not know how to check whether we are on ubuntu-20.04.
-        // So, ignore the error.
-        // if (!(await aptLibCurses5())) break;
-        await aptLibNCurses5();
+      if (tool === 'ghc') {
+        if (version !== 'latest-nightly' && compareVersions('8.3', version)) {
+          // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
+          // Atm, I do not know how to check whether we are on ubuntu-20.04.
+          // So, ignore the error.
+          // if (!(await aptLibCurses5())) break;
+          await aptLibNCurses5();
+        }
       }
       await ghcup(tool, version, os);
       if (await isInstalled(tool, version, os)) return;
