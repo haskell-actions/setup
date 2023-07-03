@@ -165,12 +165,6 @@ export async function installTool(
 
   switch (os) {
     case 'linux':
-      if (tool === 'ghc' && version === 'head') {
-        if (!(await aptBuildEssential())) break;
-
-        await ghcupGHCHead();
-        break;
-      }
       if (tool === 'ghc' && compareVersions('8.3', version)) {
         // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
         // Atm, I do not know how to check whether we are on ubuntu-20.04.
@@ -242,15 +236,6 @@ async function stack(version: string, os: OS): Promise<void> {
     })
     .then(async g => g.glob());
   await tc.cacheDir(stackPath, 'stack', version);
-}
-
-async function aptBuildEssential(): Promise<boolean> {
-  core.info(`Installing build-essential using apt-get (for ghc-head)`);
-
-  const returnCode = await exec(
-    `sudo -- sh -c "apt-get update && apt-get -y install build-essential"`
-  );
-  return returnCode === 0;
 }
 
 async function aptLibNCurses5(): Promise<boolean> {
@@ -343,19 +328,6 @@ async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
   const bin = await ghcupBin(os);
   const returnCode = await exec(bin, ['install', tool, version]);
   if (returnCode === 0) await exec(bin, ['set', tool, version]);
-}
-
-async function ghcupGHCHead(): Promise<void> {
-  core.info(`Attempting to install ghc head using ghcup`);
-  const bin = await ghcupBin('linux');
-  const returnCode = await exec(bin, [
-    'install',
-    'ghc',
-    '-u',
-    'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
-    'head'
-  ]);
-  if (returnCode === 0) await exec(bin, ['set', 'ghc', 'head']);
 }
 
 async function getChocoPath(
