@@ -63,7 +63,8 @@ export type Defaults = Record<Tool, Version> & {
  *   },
  *   'enable-stack': {
  *     required: false,
- *     default: 'latest'
+ *     description: '...',
+ *     default: false
  *   },
  *   ...
  * }
