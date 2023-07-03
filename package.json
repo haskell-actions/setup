@@ -8,7 +8,7 @@
   "scripts": {
     "bundle": "ncc build src/main.ts  && tsc -p tsconfig-lib.json",
     "test": "jest",
-    "prepare": "cd .. && husky install setup/.husky",
+    "prepare": "husky install ./.husky/",
     "yolo-upgrade": "npx npm-check-updates -u && npm install"
   },
   "repository": {
