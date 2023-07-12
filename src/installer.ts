@@ -14,7 +14,7 @@ import {compareVersions} from 'compare-versions'; // compareVersions can be used
 const exec = async (cmd: string, args?: string[]): Promise<number> =>
   e(cmd, args, {ignoreReturnCode: true});
 
-function failed(tool: Tool, version: string): void {
+async function failed(tool: Tool, version: string): Promise<void> {
   throw new Error(`All install methods for ${tool} ${version} failed`);
 }
 
