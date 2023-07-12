@@ -13321,7 +13321,7 @@ const fs = __importStar(__nccwpck_require__(7147));
 const compare_versions_1 = __nccwpck_require__(4773); // compareVersions can be used in the sense of >
 // Don't throw on non-zero.
 const exec = async (cmd, args) => (0, exec_1.exec)(cmd, args, { ignoreReturnCode: true });
-function failed(tool, version) {
+async function failed(tool, version) {
     throw new Error(`All install methods for ${tool} ${version} failed`);
 }
 async function configureOutputs(tool, version, path, os) {
@@ -13767,7 +13767,7 @@ function parseYAMLBoolean(name, val) {
 exports.parseYAMLBoolean = parseYAMLBoolean;
 function parseURL(name, val) {
     if (val === '')
-        return undefined;
+        return null;
     try {
         return new URL(val);
     }
