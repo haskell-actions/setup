@@ -1,5 +1,10 @@
 # Contributors
 
+### Pre-requisites
+
+- Node.js v16
+- NPM
+
 ### Checkin
 
 - Do checkin source (`src/`)
