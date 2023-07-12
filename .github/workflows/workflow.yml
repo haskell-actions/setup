@@ -43,6 +43,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         plan:
+          # Nightly releases
+          - ghc:   latest-nightly
+            cabal: latest
           # Latest releases
           - ghc:   latest
             cabal: latest
