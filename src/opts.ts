@@ -24,7 +24,7 @@ export interface ProgramOpt {
 
 export interface Options {
   ghc: ProgramOpt;
-  ghcup: {releaseChannel?: URL};
+  ghcup: {releaseChannel: URL | null};
   cabal: ProgramOpt & {update: boolean};
   stack: ProgramOpt & {setup: boolean};
   general: {matcher: {enable: boolean}};
@@ -138,8 +138,8 @@ export function parseYAMLBoolean(name: string, val: string): boolean {
   );
 }
 
-export function parseURL(name: string, val: string): URL | undefined {
-  if (val === '') return undefined;
+export function parseURL(name: string, val: string): URL | null {
+  if (val === '') return null;
   try {
     return new URL(val);
   } catch (e) {

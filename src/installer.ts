@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import {exec as e} from '@actions/exec';
 import {which} from '@actions/io';
 import * as tc from '@actions/tool-cache';
+import * as child_process from 'child_process';
 import {promises as afs} from 'fs';
 import {join, dirname} from 'path';
 import {ghcup_version, OS, Tool, releaseRevision} from './opts';
@@ -14,7 +15,7 @@ import {compareVersions} from 'compare-versions'; // compareVersions can be used
 const exec = async (cmd: string, args?: string[]): Promise<number> =>
   e(cmd, args, {ignoreReturnCode: true});
 
-function failed(tool: Tool, version: string): void {
+async function failed(tool: Tool, version: string): Promise<void> {
   throw new Error(`All install methods for ${tool} ${version} failed`);
 }
 
@@ -33,7 +34,32 @@ async function configureOutputs(
     core.setOutput('stack-root', sr);
     if (os === 'win32') core.exportVariable('STACK_ROOT', sr);
   }
-  core.setOutput(`${tool}-version`, version);
+
+  // can't put this in resolve() because it might run before ghcup is installed
+  let resolvedVersion = version;
+  if (version === 'latest-nightly') {
+    try {
+      const ghcupExe = await ghcupBin(os);
+      const out = await new Promise<string>((resolve, reject) =>
+        child_process.execFile(
+          ghcupExe,
+          ['list', '-nr'],
+          {encoding: 'utf-8'},
+          (error, stdout) => (error ? reject(error) : resolve(stdout))
+        )
+      );
+      resolvedVersion =
+        out
+          .split('\n')
+          .map(line => line.split(' '))
+          .filter(line => line[2] === 'latest-nightly')
+          .map(line => line[1])
+          .at(0) ?? version;
+    } catch (error) {
+      // swallow failures, just leave version as 'latest-nightly'
+    }
+  }
+  core.setOutput(`${tool}-version`, resolvedVersion);
 }
 
 async function success(
@@ -165,18 +191,14 @@ export async function installTool(
 
   switch (os) {
     case 'linux':
-      if (tool === 'ghc' && version === 'head') {
-        if (!(await aptBuildEssential())) break;
-
-        await ghcupGHCHead();
-        break;
-      }
-      if (tool === 'ghc' && compareVersions('8.3', version)) {
-        // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
-        // Atm, I do not know how to check whether we are on ubuntu-20.04.
-        // So, ignore the error.
-        // if (!(await aptLibCurses5())) break;
-        await aptLibNCurses5();
+      if (tool === 'ghc') {
+        if (version !== 'latest-nightly' && compareVersions('8.3', version)) {
+          // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
+          // Atm, I do not know how to check whether we are on ubuntu-20.04.
+          // So, ignore the error.
+          // if (!(await aptLibCurses5())) break;
+          await aptLibNCurses5();
+        }
       }
       await ghcup(tool, version, os);
       if (await isInstalled(tool, version, os)) return;
@@ -242,15 +264,6 @@ async function stack(version: string, os: OS): Promise<void> {
     })
     .then(async g => g.glob());
   await tc.cacheDir(stackPath, 'stack', version);
-}
-
-async function aptBuildEssential(): Promise<boolean> {
-  core.info(`Installing build-essential using apt-get (for ghc-head)`);
-
-  const returnCode = await exec(
-    `sudo -- sh -c "apt-get update && apt-get -y install build-essential"`
-  );
-  return returnCode === 0;
 }
 
 async function aptLibNCurses5(): Promise<boolean> {
@@ -343,19 +356,6 @@ async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
   const bin = await ghcupBin(os);
   const returnCode = await exec(bin, ['install', tool, version]);
   if (returnCode === 0) await exec(bin, ['set', tool, version]);
-}
-
-async function ghcupGHCHead(): Promise<void> {
-  core.info(`Attempting to install ghc head using ghcup`);
-  const bin = await ghcupBin('linux');
-  const returnCode = await exec(bin, [
-    'install',
-    'ghc',
-    '-u',
-    'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
-    'head'
-  ]);
-  if (returnCode === 0) await exec(bin, ['set', 'ghc', 'head']);
 }
 
 async function getChocoPath(
