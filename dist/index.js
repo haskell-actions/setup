@@ -13701,7 +13701,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOpts = exports.parseURL = exports.parseYAMLBoolean = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
+exports.getOpts = exports.parseYAMLBoolean = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __nccwpck_require__(7147);
 const js_yaml_1 = __nccwpck_require__(1917);
@@ -13801,24 +13801,33 @@ function parseYAMLBoolean(name, val) {
         `Supported boolean values: \`true | True | TRUE | false | False | FALSE\``);
 }
 exports.parseYAMLBoolean = parseYAMLBoolean;
-function parseURL(name, val) {
-    if (val === '')
-        return null;
-    try {
-        return new URL(val);
-    }
-    catch (e) {
-        throw new TypeError(`Action input "${name}" is not a valid URL`);
-    }
+/**
+ * Parse a string as a comma-separated list.
+ */
+function parseCSV(val) {
+    return val
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s != '');
 }
-exports.parseURL = parseURL;
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
     const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
     const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
     const stackEnable = (inputs['enable-stack'] || '') !== '';
     const matcherDisable = (inputs['disable-matcher'] || '') !== '';
-    const ghcupReleaseChannel = parseURL('ghcup-release-channel', inputs['ghcup-release-channel'] || '');
+    if (inputs['ghcup-release-channel']) {
+        core.warning('ghcup-release-channel is deprecated in favor of ghcup-release-channels');
+        inputs['ghcup-release-channels'] = inputs['ghcup-release-channel'];
+    }
+    const ghcupReleaseChannels = parseCSV(inputs['ghcup-release-channels'] ?? '').map(v => {
+        try {
+            return new URL(v);
+        }
+        catch (e) {
+            throw new TypeError(`Not a valid URL: ${v}`);
+        }
+    });
     // Andreas, 2023-01-05, issue #29:
     // 'cabal-update' has a default value, so we should get a proper boolean always.
     // Andreas, 2023-01-06: This is not true if we use the action as a library.
@@ -13850,7 +13859,7 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
             enable: ghcEnable
         },
         ghcup: {
-            releaseChannel: ghcupReleaseChannel
+            releaseChannels: ghcupReleaseChannels
         },
         cabal: {
             raw: verInpt.cabal,
@@ -13934,15 +13943,9 @@ async function run(inputs) {
         core.debug(`run: inputs = ${JSON.stringify(inputs)}`);
         core.debug(`run: os     = ${JSON.stringify(os)}`);
         core.debug(`run: opts   = ${JSON.stringify(opts)}`);
-        const releaseChannels = [
-            opts.ghcup.releaseChannel,
-            opts.ghc.raw === 'latest-nightly'
-                ? new URL('https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml')
-                : null
-        ].filter((v) => v !== null);
-        if (releaseChannels.length > 0) {
+        if (opts.ghcup.releaseChannels.length > 0) {
             await core.group(`Setting release channels`, async () => {
-                for (const channel of releaseChannels) {
+                for (const channel of opts.ghcup.releaseChannels) {
                     await (0, installer_1.addGhcupReleaseChannel)(channel, os);
                 }
             });

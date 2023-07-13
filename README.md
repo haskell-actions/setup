@@ -184,23 +184,35 @@ jobs:
 
 ## Inputs
 
-| Name                    | Description                                                                                                                                 | Type      | Default     |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------- |
-| `ghc-version`           | GHC version to use, e.g. `9.2` or `9.2.5`.                                                                                                  | `string`  | `latest`    |
-| `cabal-version`         | Cabal version to use, e.g. `3.6`.                                                                                                           | `string`  | `latest`    |
-| `stack-version`         | Stack version to use, e.g. `latest`. Stack will only be installed if `enable-stack` is set.                                                 | `string`  | `latest`    |
-| `enable-stack`          | If set, will setup Stack.                                                                                                                   | "boolean" | false/unset |
-| `stack-no-global`       | If set, `enable-stack` must be set. Prevents installing GHC and Cabal globally.                                                             | "boolean" | false/unset |
-| `stack-setup-ghc`       | If set, `enable-stack` must be set. Runs stack setup to install the specified GHC. (Note: setting this does _not_ imply `stack-no-global`.) | "boolean" | false/unset |
-| `disable-matcher`       | If set, disables match messages from GHC as GitHub CI annotations.                                                                          | "boolean" | false/unset |
-| `cabal-update`          | If set to `false`, skip `cabal update` step.                                                                                                | `boolean` | `true`      |
-| `ghcup-release-channel` | If set, add a [release channel](https://www.haskell.org/ghcup/guide/#pre-release-channels) to ghcup.                                        | `URL`     | none        |
+| Name                     | Description                                                                                                                                 | Type      | Default     |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------- |
+| `ghc-version`            | GHC version to use, e.g. `9.2` or `9.2.5`.                                                                                                  | `string`  | `latest`    |
+| `cabal-version`          | Cabal version to use, e.g. `3.6`.                                                                                                           | `string`  | `latest`    |
+| `stack-version`          | Stack version to use, e.g. `latest`. Stack will only be installed if `enable-stack` is set.                                                 | `string`  | `latest`    |
+| `enable-stack`           | If set, will setup Stack.                                                                                                                   | "boolean" | false/unset |
+| `stack-no-global`        | If set, `enable-stack` must be set. Prevents installing GHC and Cabal globally.                                                             | "boolean" | false/unset |
+| `stack-setup-ghc`        | If set, `enable-stack` must be set. Runs stack setup to install the specified GHC. (Note: setting this does _not_ imply `stack-no-global`.) | "boolean" | false/unset |
+| `disable-matcher`        | If set, disables match messages from GHC as GitHub CI annotations.                                                                          | "boolean" | false/unset |
+| `cabal-update`           | If set to `false`, skip `cabal update` step.                                                                                                | `boolean` | `true`      |
+| `ghcup-release-channels` | If set, add [release channels](https://www.haskell.org/ghcup/guide/#pre-release-channels) to ghcup.                                         | `URL[]`   | none        |
 
-Note: "boolean" types are set/unset, not true/false.
-That is, setting any "boolean" to a value other than the empty string (`""`) will be considered true/set.
-However, to avoid confusion and for forward compatibility, it is still recommended to **only use value `true` to set a "boolean" flag.**
+Notes:
 
-In contrast, a proper `boolean` input like `cabal-update` only accepts values `true` and `false`.
+- "boolean" types are set/unset, not true/false. That is, setting any "boolean" to a value other than the empty string (`""`) will be considered true/set.
+  However, to avoid confusion and for forward compatibility, it is still recommended to **only use value `true` to set a "boolean" flag.**
+
+  In contrast, a proper `boolean` input like `cabal-update` only accepts values `true` and `false`.
+
+- Inputs that can take multiple values (like `ghcup-release-channels`) should be specified as a comma separated list, e.g.
+
+  ```yaml
+  - uses: haskell-actions/setup@v2
+    with:
+      ghcup-release-channels: >
+        https://example.com/channel1,
+        https://example.com/channel2,
+        https://example.com/channel3,
+  ```
 
 ## Outputs
 
@@ -237,6 +249,7 @@ E.g., `8.10` will be resolved to `8.10.7`, and so will `8`.
 **GHC:**
 
 - `latest-nightly`
+  - This requires adding https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml to `ghcup-release-channels`
 - `latest` (default)
 - `9.6.2` `9.6`
 - `9.6.1`

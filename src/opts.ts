@@ -24,7 +24,7 @@ export interface ProgramOpt {
 
 export interface Options {
   ghc: ProgramOpt;
-  ghcup: {releaseChannel: URL | null};
+  ghcup: {releaseChannels: URL[]};
   cabal: ProgramOpt & {update: boolean};
   stack: ProgramOpt & {setup: boolean};
   general: {matcher: {enable: boolean}};
@@ -138,13 +138,14 @@ export function parseYAMLBoolean(name: string, val: string): boolean {
   );
 }
 
-export function parseURL(name: string, val: string): URL | null {
-  if (val === '') return null;
-  try {
-    return new URL(val);
-  } catch (e) {
-    throw new TypeError(`Action input "${name}" is not a valid URL`);
-  }
+/**
+ * Parse a string as a comma-separated list.
+ */
+function parseCSV(val: string): string[] {
+  return val
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s != '');
 }
 
 export function getOpts(
@@ -157,10 +158,24 @@ export function getOpts(
   const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
   const stackEnable = (inputs['enable-stack'] || '') !== '';
   const matcherDisable = (inputs['disable-matcher'] || '') !== '';
-  const ghcupReleaseChannel = parseURL(
-    'ghcup-release-channel',
-    inputs['ghcup-release-channel'] || ''
-  );
+
+  if (inputs['ghcup-release-channel']) {
+    core.warning(
+      'ghcup-release-channel is deprecated in favor of ghcup-release-channels'
+    );
+    inputs['ghcup-release-channels'] = inputs['ghcup-release-channel'];
+  }
+
+  const ghcupReleaseChannels = parseCSV(
+    inputs['ghcup-release-channels'] ?? ''
+  ).map(v => {
+    try {
+      return new URL(v);
+    } catch (e) {
+      throw new TypeError(`Not a valid URL: ${v}`);
+    }
+  });
+
   // Andreas, 2023-01-05, issue #29:
   // 'cabal-update' has a default value, so we should get a proper boolean always.
   // Andreas, 2023-01-06: This is not true if we use the action as a library.
@@ -204,7 +219,7 @@ export function getOpts(
       enable: ghcEnable
     },
     ghcup: {
-      releaseChannel: ghcupReleaseChannel
+      releaseChannels: ghcupReleaseChannels
     },
     cabal: {
       raw: verInpt.cabal,
