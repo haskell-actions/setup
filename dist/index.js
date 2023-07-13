@@ -13666,17 +13666,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const setup_haskell_1 = __importDefault(__nccwpck_require__(9351));
+const getToggleInput = (name) => core.getInput(name) !== '';
 (0, setup_haskell_1.default)({
     ghcVersion: core.getInput('ghc-version'),
     cabalVersion: core.getInput('cabal-version'),
     stackVersion: core.getInput('stack-version'),
-    enableStack: core.getInput('enable-stack'),
-    stackNoGlobal: core.getInput('stack-no-global'),
-    stackSetupGhc: core.getInput('stack-setup-ghc'),
-    cabalUpdate: core.getInput('cabal-update'),
+    enableStack: getToggleInput('enable-stack'),
+    stackNoGlobal: getToggleInput('stack-no-global'),
+    stackSetupGhc: getToggleInput('stack-setup-ghc'),
+    cabalUpdate: core.getBooleanInput('cabal-update'),
     ghcupReleaseChannels: core.getInput('ghcup-release-channels'),
     ghcupReleaseChannel: core.getInput('ghcup-release-channel'),
-    disableMatcher: core.getInput('disable-matcher')
+    disableMatcher: getToggleInput('disable-matcher')
 });
 
 
@@ -13711,7 +13712,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOpts = exports.parseYAMLBoolean = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
+exports.getOpts = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __nccwpck_require__(7147);
 const js_yaml_1 = __nccwpck_require__(1917);
@@ -13791,27 +13792,6 @@ function releaseRevision(version, tool, os) {
 }
 exports.releaseRevision = releaseRevision;
 /**
- * Convert a string input to a boolean according to the YAML 1.2 "core schema" specification.
- * Supported boolean renderings: `true | True | TRUE | false | False | FALSE` .
- * ref: https://yaml.org/spec/1.2/spec.html#id2804923
- * Adapted from: https://github.com/actions/toolkit/commit/fbdf27470cdcb52f16755d32082f1fee0bfb7d6d#diff-f63fb32fca85d8e177d6400ce078818a4815b80ac7a3319b60d3507354890992R94-R115
- *
- * @param     name     name of the input
- * @param     val      supposed string representation of a boolean
- * @returns   boolean
- */
-function parseYAMLBoolean(name, val) {
-    const trueValue = ['true', 'True', 'TRUE'];
-    const falseValue = ['false', 'False', 'FALSE'];
-    if (trueValue.includes(val))
-        return true;
-    if (falseValue.includes(val))
-        return false;
-    throw new TypeError(`Action input "${name}" does not meet YAML 1.2 "Core Schema" specification: \n` +
-        `Supported boolean values: \`true | True | TRUE | false | False | FALSE\``);
-}
-exports.parseYAMLBoolean = parseYAMLBoolean;
-/**
  * Parse a string as a comma-separated list.
  */
 function parseCSV(val) {
@@ -13822,10 +13802,11 @@ function parseCSV(val) {
 }
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
-    const stackNoGlobal = (inputs.stackNoGlobal ?? '') !== '';
-    const stackSetupGhc = (inputs.stackSetupGhc ?? '') !== '';
-    const stackEnable = (inputs.enableStack ?? '') !== '';
-    const matcherDisable = (inputs.disableMatcher ?? '') !== '';
+    const stackNoGlobal = inputs.stackNoGlobal ?? false;
+    const stackSetupGhc = inputs.stackSetupGhc ?? false;
+    const stackEnable = inputs.enableStack ?? false;
+    const cabalUpdate = inputs.cabalUpdate ?? true;
+    const matcherDisable = inputs.disableMatcher ?? false;
     if (inputs.ghcupReleaseChannel) {
         core.warning('ghcup-release-channel is deprecated in favor of ghcup-release-channels');
         inputs.ghcupReleaseChannels = inputs.ghcupReleaseChannel;
@@ -13838,11 +13819,6 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
             throw new TypeError(`Not a valid URL: ${v}`);
         }
     });
-    // Andreas, 2023-01-05, issue #29:
-    // 'cabal-update' has a default value, so we should get a proper boolean always.
-    // Andreas, 2023-01-06: This is not true if we use the action as a library.
-    // Thus, need to patch with default value here.
-    const cabalUpdate = parseYAMLBoolean('cabal-update', inputs.cabalUpdate ?? 'true');
     core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
     const verInpt = {
         ghc: inputs.ghcVersion || ghc.version,

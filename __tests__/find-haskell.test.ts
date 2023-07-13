@@ -46,7 +46,7 @@ describe('haskell/actions/setup', () => {
   it('Setting disable-matcher to true disables matcher', () => {
     forAllOS(os => {
       const options = getOpts(def(os), os, {
-        disableMatcher: 'true'
+        disableMatcher: true
       });
       expect(options.general.matcher.enable).toBe(false);
     });
@@ -70,7 +70,7 @@ describe('haskell/actions/setup', () => {
     const v = {ghc: '8.6.5', cabal: '3.4.1.0', stack: '1.9.3'};
     forAllOS(os => {
       const options = getOpts(def(os), os, {
-        enableStack: 'true',
+        enableStack: true,
         stackVersion: '1',
         ghcVersion: '8.6',
         cabalVersion: '3.4'
@@ -82,7 +82,7 @@ describe('haskell/actions/setup', () => {
   it('"latest" Versions resolve correctly', () => {
     forAllOS(os => {
       const options = getOpts(def(os), os, {
-        enableStack: 'true',
+        enableStack: true,
         stackVersion: 'latest',
         ghcVersion: 'latest',
         cabalVersion: 'latest'
@@ -100,7 +100,7 @@ describe('haskell/actions/setup', () => {
     const v = {ghc: '8.10.7', cabal: '2.4.1.0', stack: '2.1.3'};
     forAllOS(os => {
       const options = getOpts(def(os), os, {
-        enableStack: 'true',
+        enableStack: true,
         stackVersion: '2.1',
         ghcVersion: '8.10',
         cabalVersion: '2'
@@ -112,7 +112,7 @@ describe('haskell/actions/setup', () => {
   it('Enabling stack does not disable GHC or Cabal', () => {
     forAllOS(os => {
       const {ghc, cabal, stack} = getOpts(def(os), os, {
-        enableStack: 'true'
+        enableStack: true
       });
       expect({
         ghc: ghc.enable,
@@ -137,8 +137,8 @@ describe('haskell/actions/setup', () => {
   it('Enabling stack-no-global disables GHC and Cabal', () => {
     forAllOS(os => {
       const {ghc, cabal, stack} = getOpts(def(os), os, {
-        enableStack: 'true',
-        stackNoGlobal: 'true'
+        enableStack: true,
+        stackNoGlobal: true
       });
       expect({
         ghc: ghc.enable,
@@ -150,13 +150,13 @@ describe('haskell/actions/setup', () => {
 
   it('Enabling stack-no-global without setting enable-stack errors', () => {
     forAllOS(os =>
-      expect(() => getOpts(def(os), os, {stackNoGlobal: 'true'})).toThrow()
+      expect(() => getOpts(def(os), os, {stackNoGlobal: true})).toThrow()
     );
   });
 
   it('Enabling stack-setup-ghc without setting enable-stack errors', () => {
     forAllOS(os =>
-      expect(() => getOpts(def(os), os, {stackNoGlobal: 'true'})).toThrow()
+      expect(() => getOpts(def(os), os, {stackNoGlobal: true})).toThrow()
     );
   });
 });
