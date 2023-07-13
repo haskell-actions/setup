@@ -201,15 +201,15 @@ Notes:
 - `Toggle` inputs are booleans that are false when set as the empty string and true when set to _anything_.
   However, to avoid confusion and for forward compatibility, it is still recommended to **only use value `true` to set a `Toggle` input.**
 
-- Inputs that can take multiple values (like `ghcup-release-channels`) should be specified as a comma separated list, e.g.
+- Inputs that can take multiple values (like `ghcup-release-channels`) should be specified as a multiline list, e.g.
 
   ```yaml
   - uses: haskell-actions/setup@v2
     with:
-      ghcup-release-channels: >
-        https://example.com/channel1,
-        https://example.com/channel2,
-        https://example.com/channel3,
+      ghcup-release-channels: |
+        https://example.com/channel1
+        https://example.com/channel2
+        https://example.com/channel3
   ```
 
 ## Outputs

@@ -11,7 +11,7 @@ run({
   stackNoGlobal: getToggleInput('stack-no-global'),
   stackSetupGhc: getToggleInput('stack-setup-ghc'),
   cabalUpdate: core.getBooleanInput('cabal-update'),
-  ghcupReleaseChannels: core.getInput('ghcup-release-channels'),
+  ghcupReleaseChannels: core.getMultilineInput('ghcup-release-channels'),
   ghcupReleaseChannel: core.getInput('ghcup-release-channel'),
   disableMatcher: getToggleInput('disable-matcher')
 });

@@ -13675,7 +13675,7 @@ const getToggleInput = (name) => core.getInput(name) !== '';
     stackNoGlobal: getToggleInput('stack-no-global'),
     stackSetupGhc: getToggleInput('stack-setup-ghc'),
     cabalUpdate: core.getBooleanInput('cabal-update'),
-    ghcupReleaseChannels: core.getInput('ghcup-release-channels'),
+    ghcupReleaseChannels: core.getMultilineInput('ghcup-release-channels'),
     ghcupReleaseChannel: core.getInput('ghcup-release-channel'),
     disableMatcher: getToggleInput('disable-matcher')
 });
@@ -13791,15 +13791,6 @@ function releaseRevision(version, tool, os) {
     return result;
 }
 exports.releaseRevision = releaseRevision;
-/**
- * Parse a string as a comma-separated list.
- */
-function parseCSV(val) {
-    return val
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s != '');
-}
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
     const stackNoGlobal = inputs.stackNoGlobal ?? false;
@@ -13809,9 +13800,9 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
     const matcherDisable = inputs.disableMatcher ?? false;
     if (inputs.ghcupReleaseChannel) {
         core.warning('ghcup-release-channel is deprecated in favor of ghcup-release-channels');
-        inputs.ghcupReleaseChannels = inputs.ghcupReleaseChannel;
+        inputs.ghcupReleaseChannels = [inputs.ghcupReleaseChannel];
     }
-    const ghcupReleaseChannels = parseCSV(inputs.ghcupReleaseChannels ?? '').map(v => {
+    const ghcupReleaseChannels = (inputs.ghcupReleaseChannels ?? []).map(v => {
         try {
             return new URL(v);
         }

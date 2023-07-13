@@ -32,7 +32,7 @@ inputs:
     # which are true as soon as they are not null.
   ghcup-release-channels:
     required: false
-    description: "Release channel URLs to add to ghcup via `ghcup config add-release-channel`."
+    description: "Release channel URLs to add to ghcup via `ghcup config add-release-channel`, as a multiline string"
   ghcup-release-channel:
     required: false
     description: "Deprecated by ghcup-release-channels."

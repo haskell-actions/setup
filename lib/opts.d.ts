@@ -82,7 +82,7 @@ export type RawInputs = {
     stackNoGlobal?: boolean;
     stackSetupGhc?: boolean;
     cabalUpdate?: boolean;
-    ghcupReleaseChannels?: string;
+    ghcupReleaseChannels?: string[];
     ghcupReleaseChannel?: string;
     disableMatcher?: boolean;
 };

@@ -117,16 +117,6 @@ export function releaseRevision(version: string, tool: Tool, os: OS): string {
   return result;
 }
 
-/**
- * Parse a string as a comma-separated list.
- */
-function parseCSV(val: string): string[] {
-  return val
-    .split(',')
-    .map(s => s.trim())
-    .filter(s => s != '');
-}
-
 export type RawInputs = {
   ghcVersion?: string;
   cabalVersion?: string;
@@ -135,7 +125,7 @@ export type RawInputs = {
   stackNoGlobal?: boolean;
   stackSetupGhc?: boolean;
   cabalUpdate?: boolean;
-  ghcupReleaseChannels?: string;
+  ghcupReleaseChannels?: string[];
   ghcupReleaseChannel?: string;
   disableMatcher?: boolean;
 };
@@ -157,18 +147,16 @@ export function getOpts(
     core.warning(
       'ghcup-release-channel is deprecated in favor of ghcup-release-channels'
     );
-    inputs.ghcupReleaseChannels = inputs.ghcupReleaseChannel;
+    inputs.ghcupReleaseChannels = [inputs.ghcupReleaseChannel];
   }
 
-  const ghcupReleaseChannels = parseCSV(inputs.ghcupReleaseChannels ?? '').map(
-    v => {
-      try {
-        return new URL(v);
-      } catch (e) {
-        throw new TypeError(`Not a valid URL: ${v}`);
-      }
+  const ghcupReleaseChannels = (inputs.ghcupReleaseChannels ?? []).map(v => {
+    try {
+      return new URL(v);
+    } catch (e) {
+      throw new TypeError(`Not a valid URL: ${v}`);
     }
-  );
+  });
 
   core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
   const verInpt = {
