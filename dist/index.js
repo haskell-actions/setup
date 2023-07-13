@@ -13665,9 +13665,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const opts_1 = __nccwpck_require__(8131);
 const setup_haskell_1 = __importDefault(__nccwpck_require__(9351));
-(0, setup_haskell_1.default)(Object.fromEntries(Object.keys(opts_1.yamlInputs).map(k => [k, core.getInput(k)])));
+(0, setup_haskell_1.default)({
+    ghcVersion: core.getInput('ghc-version'),
+    cabalVersion: core.getInput('cabal-version'),
+    stackVersion: core.getInput('stack-version'),
+    enableStack: core.getInput('enable-stack'),
+    stackNoGlobal: core.getInput('stack-no-global'),
+    stackSetupGhc: core.getInput('stack-setup-ghc'),
+    cabalUpdate: core.getInput('cabal-update'),
+    ghcupReleaseChannels: core.getInput('ghcup-release-channels'),
+    ghcupReleaseChannel: core.getInput('ghcup-release-channel'),
+    disableMatcher: core.getInput('disable-matcher')
+});
 
 
 /***/ }),
@@ -13812,15 +13822,15 @@ function parseCSV(val) {
 }
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
-    const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
-    const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
-    const stackEnable = (inputs['enable-stack'] || '') !== '';
-    const matcherDisable = (inputs['disable-matcher'] || '') !== '';
-    if (inputs['ghcup-release-channel']) {
+    const stackNoGlobal = (inputs.stackNoGlobal ?? '') !== '';
+    const stackSetupGhc = (inputs.stackSetupGhc ?? '') !== '';
+    const stackEnable = (inputs.enableStack ?? '') !== '';
+    const matcherDisable = (inputs.disableMatcher ?? '') !== '';
+    if (inputs.ghcupReleaseChannel) {
         core.warning('ghcup-release-channel is deprecated in favor of ghcup-release-channels');
-        inputs['ghcup-release-channels'] = inputs['ghcup-release-channel'];
+        inputs.ghcupReleaseChannels = inputs.ghcupReleaseChannel;
     }
-    const ghcupReleaseChannels = parseCSV(inputs['ghcup-release-channels'] ?? '').map(v => {
+    const ghcupReleaseChannels = parseCSV(inputs.ghcupReleaseChannels ?? '').map(v => {
         try {
             return new URL(v);
         }
@@ -13832,12 +13842,12 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
     // 'cabal-update' has a default value, so we should get a proper boolean always.
     // Andreas, 2023-01-06: This is not true if we use the action as a library.
     // Thus, need to patch with default value here.
-    const cabalUpdate = parseYAMLBoolean('cabal-update', inputs['cabal-update'] || 'true');
+    const cabalUpdate = parseYAMLBoolean('cabal-update', inputs.cabalUpdate ?? 'true');
     core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
     const verInpt = {
-        ghc: inputs['ghc-version'] || ghc.version,
-        cabal: inputs['cabal-version'] || cabal.version,
-        stack: inputs['stack-version'] || stack.version
+        ghc: inputs.ghcVersion || ghc.version,
+        cabal: inputs.cabalVersion || cabal.version,
+        stack: inputs.stackVersion || stack.version
     };
     const errors = [];
     if (stackNoGlobal && !stackEnable) {

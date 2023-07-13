@@ -46,7 +46,7 @@ describe('haskell/actions/setup', () => {
   it('Setting disable-matcher to true disables matcher', () => {
     forAllOS(os => {
       const options = getOpts(def(os), os, {
-        'disable-matcher': 'true'
+        disableMatcher: 'true'
       });
       expect(options.general.matcher.enable).toBe(false);
     });
@@ -70,10 +70,10 @@ describe('haskell/actions/setup', () => {
     const v = {ghc: '8.6.5', cabal: '3.4.1.0', stack: '1.9.3'};
     forAllOS(os => {
       const options = getOpts(def(os), os, {
-        'enable-stack': 'true',
-        'stack-version': '1',
-        'ghc-version': '8.6',
-        'cabal-version': '3.4'
+        enableStack: 'true',
+        stackVersion: '1',
+        ghcVersion: '8.6',
+        cabalVersion: '3.4'
       });
       forAllTools(t => expect(options[t].resolved).toBe(v[t]));
     });
@@ -82,10 +82,10 @@ describe('haskell/actions/setup', () => {
   it('"latest" Versions resolve correctly', () => {
     forAllOS(os => {
       const options = getOpts(def(os), os, {
-        'enable-stack': 'true',
-        'stack-version': 'latest',
-        'ghc-version': 'latest',
-        'cabal-version': 'latest'
+        enableStack: 'true',
+        stackVersion: 'latest',
+        ghcVersion: 'latest',
+        cabalVersion: 'latest'
       });
       forAllTools(t =>
         expect(options[t].resolved).toBe(
@@ -100,10 +100,10 @@ describe('haskell/actions/setup', () => {
     const v = {ghc: '8.10.7', cabal: '2.4.1.0', stack: '2.1.3'};
     forAllOS(os => {
       const options = getOpts(def(os), os, {
-        'enable-stack': 'true',
-        'stack-version': '2.1',
-        'ghc-version': '8.10',
-        'cabal-version': '2'
+        enableStack: 'true',
+        stackVersion: '2.1',
+        ghcVersion: '8.10',
+        cabalVersion: '2'
       });
       forAllTools(t => expect(options[t].resolved).toBe(v[t]));
     });
@@ -112,7 +112,7 @@ describe('haskell/actions/setup', () => {
   it('Enabling stack does not disable GHC or Cabal', () => {
     forAllOS(os => {
       const {ghc, cabal, stack} = getOpts(def(os), os, {
-        'enable-stack': 'true'
+        enableStack: 'true'
       });
       expect({
         ghc: ghc.enable,
@@ -125,20 +125,20 @@ describe('haskell/actions/setup', () => {
   it('Resolves revisions correctly on Windows', () => {
     // Test the case where there is a revision in chocolatey
     expect(
-      getOpts(def('win32'), 'win32', {'ghc-version': '8.10.2'}).ghc.resolved
+      getOpts(def('win32'), 'win32', {ghcVersion: '8.10.2'}).ghc.resolved
     ).toBe('8.10.2'); // Andreas, 2022-12-29: revisions are handled locally in choco() now
 
     // Test the case where there is not a revision in chocolatey
     expect(
-      getOpts(def('win32'), 'win32', {'ghc-version': '8.8.1'}).ghc.resolved
+      getOpts(def('win32'), 'win32', {ghcVersion: '8.8.1'}).ghc.resolved
     ).toBe('8.8.1');
   });
 
   it('Enabling stack-no-global disables GHC and Cabal', () => {
     forAllOS(os => {
       const {ghc, cabal, stack} = getOpts(def(os), os, {
-        'enable-stack': 'true',
-        'stack-no-global': 'true'
+        enableStack: 'true',
+        stackNoGlobal: 'true'
       });
       expect({
         ghc: ghc.enable,
@@ -150,13 +150,13 @@ describe('haskell/actions/setup', () => {
 
   it('Enabling stack-no-global without setting enable-stack errors', () => {
     forAllOS(os =>
-      expect(() => getOpts(def(os), os, {'stack-no-global': 'true'})).toThrow()
+      expect(() => getOpts(def(os), os, {stackNoGlobal: 'true'})).toThrow()
     );
   });
 
   it('Enabling stack-setup-ghc without setting enable-stack errors', () => {
     forAllOS(os =>
-      expect(() => getOpts(def(os), os, {'stack-setup-ghc': 'true'})).toThrow()
+      expect(() => getOpts(def(os), os, {stackNoGlobal: 'true'})).toThrow()
     );
   });
 });

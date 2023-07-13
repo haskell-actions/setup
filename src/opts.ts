@@ -148,33 +148,46 @@ function parseCSV(val: string): string[] {
     .filter(s => s != '');
 }
 
+export type RawInputs = {
+  ghcVersion?: string;
+  cabalVersion?: string;
+  stackVersion?: string;
+  enableStack?: string;
+  stackNoGlobal?: string;
+  stackSetupGhc?: string;
+  cabalUpdate?: string;
+  ghcupReleaseChannels?: string;
+  ghcupReleaseChannel?: string;
+  disableMatcher?: string;
+};
+
 export function getOpts(
   {ghc, cabal, stack}: Defaults,
   os: OS,
-  inputs: Record<string, string>
+  inputs: RawInputs
 ): Options {
   core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
-  const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
-  const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
-  const stackEnable = (inputs['enable-stack'] || '') !== '';
-  const matcherDisable = (inputs['disable-matcher'] || '') !== '';
+  const stackNoGlobal = (inputs.stackNoGlobal ?? '') !== '';
+  const stackSetupGhc = (inputs.stackSetupGhc ?? '') !== '';
+  const stackEnable = (inputs.enableStack ?? '') !== '';
+  const matcherDisable = (inputs.disableMatcher ?? '') !== '';
 
-  if (inputs['ghcup-release-channel']) {
+  if (inputs.ghcupReleaseChannel) {
     core.warning(
       'ghcup-release-channel is deprecated in favor of ghcup-release-channels'
     );
-    inputs['ghcup-release-channels'] = inputs['ghcup-release-channel'];
+    inputs.ghcupReleaseChannels = inputs.ghcupReleaseChannel;
   }
 
-  const ghcupReleaseChannels = parseCSV(
-    inputs['ghcup-release-channels'] ?? ''
-  ).map(v => {
-    try {
-      return new URL(v);
-    } catch (e) {
-      throw new TypeError(`Not a valid URL: ${v}`);
+  const ghcupReleaseChannels = parseCSV(inputs.ghcupReleaseChannels ?? '').map(
+    v => {
+      try {
+        return new URL(v);
+      } catch (e) {
+        throw new TypeError(`Not a valid URL: ${v}`);
+      }
     }
-  });
+  );
 
   // Andreas, 2023-01-05, issue #29:
   // 'cabal-update' has a default value, so we should get a proper boolean always.
@@ -182,13 +195,13 @@ export function getOpts(
   // Thus, need to patch with default value here.
   const cabalUpdate = parseYAMLBoolean(
     'cabal-update',
-    inputs['cabal-update'] || 'true'
+    inputs.cabalUpdate ?? 'true'
   );
   core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
   const verInpt = {
-    ghc: inputs['ghc-version'] || ghc.version,
-    cabal: inputs['cabal-version'] || cabal.version,
-    stack: inputs['stack-version'] || stack.version
+    ghc: inputs.ghcVersion || ghc.version,
+    cabal: inputs.cabalVersion || cabal.version,
+    stack: inputs.stackVersion || stack.version
   };
 
   const errors = [];

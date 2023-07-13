@@ -1,1 +1,2 @@
-export default function run(inputs: Record<string, string>): Promise<void>;
+import { RawInputs } from './opts';
+export default function run(inputs: RawInputs): Promise<void>;

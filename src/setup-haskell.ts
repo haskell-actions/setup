@@ -4,7 +4,7 @@ import ensureError from 'ensure-error';
 import * as fs from 'fs';
 import * as path from 'path';
 import {EOL} from 'os';
-import {getOpts, getDefaults, Tool} from './opts';
+import {RawInputs, getOpts, getDefaults, Tool} from './opts';
 import {addGhcupReleaseChannel, installTool, resetTool} from './installer';
 import type {OS} from './opts';
 import {exec} from '@actions/exec';
@@ -19,9 +19,7 @@ async function cabalConfig(): Promise<string> {
   return out.toString().trim().split('\n').slice(-1)[0].trim();
 }
 
-export default async function run(
-  inputs: Record<string, string>
-): Promise<void> {
+export default async function run(inputs: RawInputs): Promise<void> {
   try {
     core.info('Preparing to setup a Haskell environment');
     const os = process.platform as OS;

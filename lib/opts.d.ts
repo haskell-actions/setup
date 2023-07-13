@@ -85,5 +85,17 @@ export declare function releaseRevision(version: string, tool: Tool, os: OS): st
  * @returns   boolean
  */
 export declare function parseYAMLBoolean(name: string, val: string): boolean;
-export declare function getOpts({ ghc, cabal, stack }: Defaults, os: OS, inputs: Record<string, string>): Options;
+export type RawInputs = {
+    ghcVersion?: string;
+    cabalVersion?: string;
+    stackVersion?: string;
+    enableStack?: string;
+    stackNoGlobal?: string;
+    stackSetupGhc?: string;
+    cabalUpdate?: string;
+    ghcupReleaseChannels?: string;
+    ghcupReleaseChannel?: string;
+    disableMatcher?: string;
+};
+export declare function getOpts({ ghc, cabal, stack }: Defaults, os: OS, inputs: RawInputs): Options;
 export {};
