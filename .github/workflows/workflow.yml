@@ -31,6 +31,8 @@ jobs:
       - run: npm ci --prefer-offline --no-audit --progress=false
       - run: npm run bundle
       - run: npm test
+      - name: Ensure generated files are up-to-date
+        run: git diff --exit-code dist/ lib/
 
   install-haskell:
     name: GHC ${{ matrix.plan.ghc }}, Cabal ${{ matrix.plan.cabal }} - ${{ matrix.os }}
