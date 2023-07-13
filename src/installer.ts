@@ -38,26 +38,7 @@ async function configureOutputs(
   // can't put this in resolve() because it might run before ghcup is installed
   let resolvedVersion = version;
   if (version === 'latest-nightly') {
-    try {
-      const ghcupExe = await ghcupBin(os);
-      const out = await new Promise<string>((resolve, reject) =>
-        child_process.execFile(
-          ghcupExe,
-          ['list', '-nr'],
-          {encoding: 'utf-8'},
-          (error, stdout) => (error ? reject(error) : resolve(stdout))
-        )
-      );
-      resolvedVersion =
-        out
-          .split('\n')
-          .map(line => line.split(' '))
-          .filter(line => line[2] === 'latest-nightly')
-          .map(line => line[1])
-          .at(0) ?? version;
-    } catch (error) {
-      // swallow failures, just leave version as 'latest-nightly'
-    }
+    resolvedVersion = (await getLatestNightlyFromGhcup(os)) ?? version;
   }
   core.setOutput(`${tool}-version`, resolvedVersion);
 }
@@ -349,6 +330,43 @@ export async function addGhcupReleaseChannel(
   core.info(`Adding ghcup release channel: ${channel}`);
   const bin = await ghcupBin(os);
   await exec(bin, ['config', 'add-release-channel', channel.toString()]);
+}
+
+/**
+ * Get the resolved version of the `latest-nightly` GHC tag from ghcup,
+ * e.g. '9.9.20230711'
+ */
+async function getLatestNightlyFromGhcup(os: OS): Promise<string | null> {
+  try {
+    const ghcupExe = await ghcupBin(os);
+    /* Example output:
+
+      ghc 9.0.2 base-4.15.1.0
+      ghc 9.7.20230526 nightly 2023-06-27
+      ghc 9.9.20230711 latest-nightly 2023-07-12
+      cabal 2.4.1.0  no-bindist
+      cabal 3.6.2.0 recommended
+    */
+    const out = await new Promise<string>((resolve, reject) =>
+      child_process.execFile(
+        ghcupExe,
+        ['list', '-nr'],
+        {encoding: 'utf-8'},
+        (error, stdout) => (error ? reject(error) : resolve(stdout))
+      )
+    );
+    return (
+      out
+        .split('\n')
+        .map(line => line.split(' '))
+        .filter(line => line[2] === 'latest-nightly')
+        .map(line => line[1])
+        .at(0) ?? null
+    );
+  } catch (error) {
+    // swallow failures, just return null
+    return null;
+  }
 }
 
 async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
