@@ -24,7 +24,7 @@ const forAllOS = (fn: (t: OS) => any) =>
 const forAllTools = (fn: (t: Tool) => any) =>
   (['ghc', 'cabal', 'stack'] as const).forEach(fn);
 
-describe('haskell/actions/setup', () => {
+describe('haskell-actions/setup', () => {
   it('Parses action.yml to get correct default versions', () => {
     forAllOS(os =>
       forAllTools(t =>
