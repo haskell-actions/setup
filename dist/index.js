@@ -13667,6 +13667,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const setup_haskell_1 = __importDefault(__nccwpck_require__(9351));
 const getToggleInput = (name) => core.getInput(name) !== '';
+const getBooleanInput = (name) => {
+    // https://github.com/actions/toolkit/issues/844
+    if (!process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`]) {
+        return undefined;
+    }
+    return core.getBooleanInput(name);
+};
 (0, setup_haskell_1.default)({
     ghcVersion: core.getInput('ghc-version'),
     cabalVersion: core.getInput('cabal-version'),
@@ -13674,7 +13681,7 @@ const getToggleInput = (name) => core.getInput(name) !== '';
     enableStack: getToggleInput('enable-stack'),
     stackNoGlobal: getToggleInput('stack-no-global'),
     stackSetupGhc: getToggleInput('stack-setup-ghc'),
-    cabalUpdate: core.getBooleanInput('cabal-update'),
+    cabalUpdate: getBooleanInput('cabal-update'),
     ghcupReleaseChannels: core.getMultilineInput('ghcup-release-channels'),
     ghcupReleaseChannel: core.getInput('ghcup-release-channel'),
     disableMatcher: getToggleInput('disable-matcher')
