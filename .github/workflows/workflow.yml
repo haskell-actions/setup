@@ -43,6 +43,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         plan:
+          # Nightly releases
+          - ghc:   latest-nightly
+            cabal: latest
           # Latest releases
           - ghc:   latest
             cabal: latest
@@ -90,9 +93,25 @@ jobs:
               # and of cabal just 2.4, 3.0, 3.2, 3.4
               # according to https://launchpad.net/~hvr/+archive/ubuntu/ghc?field.series_filter=focal
 
-          # Test ghcup pre-release channel
+          # Any matrix combinations with latest-nightly should add the appropriate release channel
+          - plan:
+              ghc: latest-nightly
+            ghcup_release_channels: |
+              https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml
+
+          # Test deprecated release channel still works for now
           - os: ubuntu-latest
             ghcup_release_channel: "https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-prereleases-0.0.7.yaml"
+            plan:
+              ghc:   "9.6.0.20230111"
+              cabal: "3.8"
+
+          # Test ghcup release channels
+          - os: ubuntu-latest
+            ghcup_release_channels: |
+              https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-0.0.7.yaml
+              https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-prereleases-0.0.7.yaml
+              https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-vanilla-0.0.7.yaml
             plan:
               ghc:   "9.6.0.20230111"
               cabal: "3.8"
@@ -143,6 +162,7 @@ jobs:
         with:
           ghc-version: ${{ matrix.plan.ghc }}
           ghcup-release-channel: ${{ matrix.ghcup_release_channel }}
+          ghcup-release-channels: ${{ matrix.ghcup_release_channels }}
           cabal-version: ${{ matrix.plan.cabal }}
           cabal-update: ${{ matrix.cabal_update }}
 

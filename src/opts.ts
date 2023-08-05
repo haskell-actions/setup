@@ -24,7 +24,7 @@ export interface ProgramOpt {
 
 export interface Options {
   ghc: ProgramOpt;
-  ghcup: {releaseChannel?: URL};
+  ghcup: {releaseChannels: URL[]};
   cabal: ProgramOpt & {update: boolean};
   stack: ProgramOpt & {setup: boolean};
   general: {matcher: {enable: boolean}};
@@ -117,63 +117,52 @@ export function releaseRevision(version: string, tool: Tool, os: OS): string {
   return result;
 }
 
-/**
- * Convert a string input to a boolean according to the YAML 1.2 "core schema" specification.
- * Supported boolean renderings: `true | True | TRUE | false | False | FALSE` .
- * ref: https://yaml.org/spec/1.2/spec.html#id2804923
- * Adapted from: https://github.com/actions/toolkit/commit/fbdf27470cdcb52f16755d32082f1fee0bfb7d6d#diff-f63fb32fca85d8e177d6400ce078818a4815b80ac7a3319b60d3507354890992R94-R115
- *
- * @param     name     name of the input
- * @param     val      supposed string representation of a boolean
- * @returns   boolean
- */
-export function parseYAMLBoolean(name: string, val: string): boolean {
-  const trueValue = ['true', 'True', 'TRUE'];
-  const falseValue = ['false', 'False', 'FALSE'];
-  if (trueValue.includes(val)) return true;
-  if (falseValue.includes(val)) return false;
-  throw new TypeError(
-    `Action input "${name}" does not meet YAML 1.2 "Core Schema" specification: \n` +
-      `Supported boolean values: \`true | True | TRUE | false | False | FALSE\``
-  );
-}
-
-export function parseURL(name: string, val: string): URL | undefined {
-  if (val === '') return undefined;
-  try {
-    return new URL(val);
-  } catch (e) {
-    throw new TypeError(`Action input "${name}" is not a valid URL`);
-  }
-}
+export type RawInputs = {
+  ghcVersion?: string;
+  cabalVersion?: string;
+  stackVersion?: string;
+  enableStack?: boolean;
+  stackNoGlobal?: boolean;
+  stackSetupGhc?: boolean;
+  cabalUpdate?: boolean;
+  ghcupReleaseChannels?: string[];
+  ghcupReleaseChannel?: string;
+  disableMatcher?: boolean;
+};
 
 export function getOpts(
   {ghc, cabal, stack}: Defaults,
   os: OS,
-  inputs: Record<string, string>
+  inputs: RawInputs
 ): Options {
   core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
-  const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
-  const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
-  const stackEnable = (inputs['enable-stack'] || '') !== '';
-  const matcherDisable = (inputs['disable-matcher'] || '') !== '';
-  const ghcupReleaseChannel = parseURL(
-    'ghcup-release-channel',
-    inputs['ghcup-release-channel'] || ''
-  );
-  // Andreas, 2023-01-05, issue #29:
-  // 'cabal-update' has a default value, so we should get a proper boolean always.
-  // Andreas, 2023-01-06: This is not true if we use the action as a library.
-  // Thus, need to patch with default value here.
-  const cabalUpdate = parseYAMLBoolean(
-    'cabal-update',
-    inputs['cabal-update'] || 'true'
-  );
+
+  const stackNoGlobal = inputs.stackNoGlobal ?? false;
+  const stackSetupGhc = inputs.stackSetupGhc ?? false;
+  const stackEnable = inputs.enableStack ?? false;
+  const cabalUpdate = inputs.cabalUpdate ?? true;
+  const matcherDisable = inputs.disableMatcher ?? false;
+
+  if (inputs.ghcupReleaseChannel) {
+    core.warning(
+      'ghcup-release-channel is deprecated in favor of ghcup-release-channels'
+    );
+    inputs.ghcupReleaseChannels = [inputs.ghcupReleaseChannel];
+  }
+
+  const ghcupReleaseChannels = (inputs.ghcupReleaseChannels ?? []).map(v => {
+    try {
+      return new URL(v);
+    } catch (e) {
+      throw new TypeError(`Not a valid URL: ${v}`);
+    }
+  });
+
   core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
   const verInpt = {
-    ghc: inputs['ghc-version'] || ghc.version,
-    cabal: inputs['cabal-version'] || cabal.version,
-    stack: inputs['stack-version'] || stack.version
+    ghc: inputs.ghcVersion || ghc.version,
+    cabal: inputs.cabalVersion || cabal.version,
+    stack: inputs.stackVersion || stack.version
   };
 
   const errors = [];
@@ -204,7 +193,7 @@ export function getOpts(
       enable: ghcEnable
     },
     ghcup: {
-      releaseChannel: ghcupReleaseChannel
+      releaseChannels: ghcupReleaseChannels
     },
     cabal: {
       raw: verInpt.cabal,

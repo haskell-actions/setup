@@ -13312,6 +13312,7 @@ const core = __importStar(__nccwpck_require__(2186));
 const exec_1 = __nccwpck_require__(1514);
 const io_1 = __nccwpck_require__(7436);
 const tc = __importStar(__nccwpck_require__(7784));
+const child_process = __importStar(__nccwpck_require__(2081));
 const fs_1 = __nccwpck_require__(7147);
 const path_1 = __nccwpck_require__(1017);
 const opts_1 = __nccwpck_require__(8131);
@@ -13321,7 +13322,7 @@ const fs = __importStar(__nccwpck_require__(7147));
 const compare_versions_1 = __nccwpck_require__(4773); // compareVersions can be used in the sense of >
 // Don't throw on non-zero.
 const exec = async (cmd, args) => (0, exec_1.exec)(cmd, args, { ignoreReturnCode: true });
-function failed(tool, version) {
+async function failed(tool, version) {
     throw new Error(`All install methods for ${tool} ${version} failed`);
 }
 async function configureOutputs(tool, version, path, os) {
@@ -13334,7 +13335,12 @@ async function configureOutputs(tool, version, path, os) {
         if (os === 'win32')
             core.exportVariable('STACK_ROOT', sr);
     }
-    core.setOutput(`${tool}-version`, version);
+    // can't put this in resolve() because it might run before ghcup is installed
+    let resolvedVersion = version;
+    if (version === 'latest-nightly') {
+        resolvedVersion = (await getLatestNightlyFromGhcup(os)) ?? version;
+    }
+    core.setOutput(`${tool}-version`, resolvedVersion);
 }
 async function success(tool, version, path, os) {
     core.addPath(path);
@@ -13436,18 +13442,14 @@ async function installTool(tool, version, os) {
     }
     switch (os) {
         case 'linux':
-            if (tool === 'ghc' && version === 'head') {
-                if (!(await aptBuildEssential()))
-                    break;
-                await ghcupGHCHead();
-                break;
-            }
-            if (tool === 'ghc' && (0, compare_versions_1.compareVersions)('8.3', version)) {
-                // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
-                // Atm, I do not know how to check whether we are on ubuntu-20.04.
-                // So, ignore the error.
-                // if (!(await aptLibCurses5())) break;
-                await aptLibNCurses5();
+            if (tool === 'ghc') {
+                if (version !== 'latest-nightly' && (0, compare_versions_1.compareVersions)('8.3', version)) {
+                    // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
+                    // Atm, I do not know how to check whether we are on ubuntu-20.04.
+                    // So, ignore the error.
+                    // if (!(await aptLibCurses5())) break;
+                    await aptLibNCurses5();
+                }
             }
             await ghcup(tool, version, os);
             if (await isInstalled(tool, version, os))
@@ -13507,11 +13509,6 @@ async function stack(version, os) {
     })
         .then(async (g) => g.glob());
     await tc.cacheDir(stackPath, 'stack', version);
-}
-async function aptBuildEssential() {
-    core.info(`Installing build-essential using apt-get (for ghc-head)`);
-    const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install build-essential"`);
-    return returnCode === 0;
 }
 async function aptLibNCurses5() {
     core.info(`Installing libcurses5 and libtinfo5 using apt-get (for ghc < 8.3)`);
@@ -13574,25 +13571,40 @@ async function addGhcupReleaseChannel(channel, os) {
     await exec(bin, ['config', 'add-release-channel', channel.toString()]);
 }
 exports.addGhcupReleaseChannel = addGhcupReleaseChannel;
+/**
+ * Get the resolved version of the `latest-nightly` GHC tag from ghcup,
+ * e.g. '9.9.20230711'
+ */
+async function getLatestNightlyFromGhcup(os) {
+    try {
+        const ghcupExe = await ghcupBin(os);
+        /* Example output:
+    
+          ghc 9.0.2 base-4.15.1.0
+          ghc 9.7.20230526 nightly 2023-06-27
+          ghc 9.9.20230711 latest-nightly 2023-07-12
+          cabal 2.4.1.0  no-bindist
+          cabal 3.6.2.0 recommended
+        */
+        const out = await new Promise((resolve, reject) => child_process.execFile(ghcupExe, ['list', '-nr'], { encoding: 'utf-8' }, (error, stdout) => (error ? reject(error) : resolve(stdout))));
+        return (out
+            .split('\n')
+            .map(line => line.split(' '))
+            .filter(line => line[2] === 'latest-nightly')
+            .map(line => line[1])
+            .at(0) ?? null);
+    }
+    catch (error) {
+        // swallow failures, just return null
+        return null;
+    }
+}
 async function ghcup(tool, version, os) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
     const bin = await ghcupBin(os);
     const returnCode = await exec(bin, ['install', tool, version]);
     if (returnCode === 0)
         await exec(bin, ['set', tool, version]);
-}
-async function ghcupGHCHead() {
-    core.info(`Attempting to install ghc head using ghcup`);
-    const bin = await ghcupBin('linux');
-    const returnCode = await exec(bin, [
-        'install',
-        'ghc',
-        '-u',
-        'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
-        'head'
-    ]);
-    if (returnCode === 0)
-        await exec(bin, ['set', 'ghc', 'head']);
 }
 async function getChocoPath(tool, version, revision) {
     // Environment variable 'ChocolateyToolsLocation' will be added to Hosted images soon
@@ -13653,9 +13665,27 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const opts_1 = __nccwpck_require__(8131);
 const setup_haskell_1 = __importDefault(__nccwpck_require__(9351));
-(0, setup_haskell_1.default)(Object.fromEntries(Object.keys(opts_1.yamlInputs).map(k => [k, core.getInput(k)])));
+const getToggleInput = (name) => core.getInput(name) !== '';
+const getBooleanInput = (name) => {
+    // https://github.com/actions/toolkit/issues/844
+    if (!process.env[`INPUT_${name.replace(/ /g, '_').toUpperCase()}`]) {
+        return undefined;
+    }
+    return core.getBooleanInput(name);
+};
+(0, setup_haskell_1.default)({
+    ghcVersion: core.getInput('ghc-version'),
+    cabalVersion: core.getInput('cabal-version'),
+    stackVersion: core.getInput('stack-version'),
+    enableStack: getToggleInput('enable-stack'),
+    stackNoGlobal: getToggleInput('stack-no-global'),
+    stackSetupGhc: getToggleInput('stack-setup-ghc'),
+    cabalUpdate: getBooleanInput('cabal-update'),
+    ghcupReleaseChannels: core.getMultilineInput('ghcup-release-channels'),
+    ghcupReleaseChannel: core.getInput('ghcup-release-channel'),
+    disableMatcher: getToggleInput('disable-matcher')
+});
 
 
 /***/ }),
@@ -13689,7 +13719,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOpts = exports.parseURL = exports.parseYAMLBoolean = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
+exports.getOpts = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __nccwpck_require__(7147);
 const js_yaml_1 = __nccwpck_require__(1917);
@@ -13768,55 +13798,30 @@ function releaseRevision(version, tool, os) {
     return result;
 }
 exports.releaseRevision = releaseRevision;
-/**
- * Convert a string input to a boolean according to the YAML 1.2 "core schema" specification.
- * Supported boolean renderings: `true | True | TRUE | false | False | FALSE` .
- * ref: https://yaml.org/spec/1.2/spec.html#id2804923
- * Adapted from: https://github.com/actions/toolkit/commit/fbdf27470cdcb52f16755d32082f1fee0bfb7d6d#diff-f63fb32fca85d8e177d6400ce078818a4815b80ac7a3319b60d3507354890992R94-R115
- *
- * @param     name     name of the input
- * @param     val      supposed string representation of a boolean
- * @returns   boolean
- */
-function parseYAMLBoolean(name, val) {
-    const trueValue = ['true', 'True', 'TRUE'];
-    const falseValue = ['false', 'False', 'FALSE'];
-    if (trueValue.includes(val))
-        return true;
-    if (falseValue.includes(val))
-        return false;
-    throw new TypeError(`Action input "${name}" does not meet YAML 1.2 "Core Schema" specification: \n` +
-        `Supported boolean values: \`true | True | TRUE | false | False | FALSE\``);
-}
-exports.parseYAMLBoolean = parseYAMLBoolean;
-function parseURL(name, val) {
-    if (val === '')
-        return undefined;
-    try {
-        return new URL(val);
-    }
-    catch (e) {
-        throw new TypeError(`Action input "${name}" is not a valid URL`);
-    }
-}
-exports.parseURL = parseURL;
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
-    const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
-    const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
-    const stackEnable = (inputs['enable-stack'] || '') !== '';
-    const matcherDisable = (inputs['disable-matcher'] || '') !== '';
-    const ghcupReleaseChannel = parseURL('ghcup-release-channel', inputs['ghcup-release-channel'] || '');
-    // Andreas, 2023-01-05, issue #29:
-    // 'cabal-update' has a default value, so we should get a proper boolean always.
-    // Andreas, 2023-01-06: This is not true if we use the action as a library.
-    // Thus, need to patch with default value here.
-    const cabalUpdate = parseYAMLBoolean('cabal-update', inputs['cabal-update'] || 'true');
+    const stackNoGlobal = inputs.stackNoGlobal ?? false;
+    const stackSetupGhc = inputs.stackSetupGhc ?? false;
+    const stackEnable = inputs.enableStack ?? false;
+    const cabalUpdate = inputs.cabalUpdate ?? true;
+    const matcherDisable = inputs.disableMatcher ?? false;
+    if (inputs.ghcupReleaseChannel) {
+        core.warning('ghcup-release-channel is deprecated in favor of ghcup-release-channels');
+        inputs.ghcupReleaseChannels = [inputs.ghcupReleaseChannel];
+    }
+    const ghcupReleaseChannels = (inputs.ghcupReleaseChannels ?? []).map(v => {
+        try {
+            return new URL(v);
+        }
+        catch (e) {
+            throw new TypeError(`Not a valid URL: ${v}`);
+        }
+    });
     core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
     const verInpt = {
-        ghc: inputs['ghc-version'] || ghc.version,
-        cabal: inputs['cabal-version'] || cabal.version,
-        stack: inputs['stack-version'] || stack.version
+        ghc: inputs.ghcVersion || ghc.version,
+        cabal: inputs.cabalVersion || cabal.version,
+        stack: inputs.stackVersion || stack.version
     };
     const errors = [];
     if (stackNoGlobal && !stackEnable) {
@@ -13838,7 +13843,7 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
             enable: ghcEnable
         },
         ghcup: {
-            releaseChannel: ghcupReleaseChannel
+            releaseChannels: ghcupReleaseChannels
         },
         cabal: {
             raw: verInpt.cabal,
@@ -13922,8 +13927,12 @@ async function run(inputs) {
         core.debug(`run: inputs = ${JSON.stringify(inputs)}`);
         core.debug(`run: os     = ${JSON.stringify(os)}`);
         core.debug(`run: opts   = ${JSON.stringify(opts)}`);
-        if (opts.ghcup.releaseChannel) {
-            await core.group(`Preparing ghcup environment`, async () => (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel, os));
+        if (opts.ghcup.releaseChannels.length > 0) {
+            await core.group(`Setting release channels`, async () => {
+                for (const channel of opts.ghcup.releaseChannels) {
+                    await (0, installer_1.addGhcupReleaseChannel)(channel, os);
+                }
+            });
         }
         for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable)) {
             await core.group(`Preparing ${t} environment`, async () => (0, installer_1.resetTool)(t, resolved, os));
