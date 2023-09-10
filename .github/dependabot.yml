@@ -10,10 +10,13 @@ updates:
     schedule:
       interval: "weekly"
 
-  # Enable version updates for npm
-  - package-ecosystem: "npm"
-    # Look for `package.json` and `lock` files in the action's `root` directory
-    directory: "/"
-    # Check the npm registry for updates every day (weekdays)
-    schedule:
-      interval: "monthly"
+  ## Andreas, 2023-09-10, turn off dependabot for npm since it does not keep the files in sync.
+  ## See https://github.com/haskell-actions/setup/issues/33
+  ##
+  # # Enable version updates for npm
+  # - package-ecosystem: "npm"
+  #   # Look for `package.json` and `lock` files in the action's `root` directory
+  #   directory: "/"
+  #   # Check the npm registry for updates every day (weekdays)
+  #   schedule:
+  #     interval: "monthly"
