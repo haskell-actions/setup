@@ -302,6 +302,7 @@ Recommendation: Use the latest available version if possible.
 **Stack:** (with `enable-stack: true`)
 
 - `latest` (default, recommended)
+- `2.13.1` `2.13`
 - `2.11.1` `2.11`
 - `2.9.3` `2.9`
 - `2.9.1`
