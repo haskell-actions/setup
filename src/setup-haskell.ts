@@ -6,7 +6,7 @@ import * as path from 'path';
 import {EOL} from 'os';
 import {getOpts, getDefaults, Tool} from './opts';
 import {addGhcupReleaseChannel, installTool, resetTool} from './installer';
-import type {OS} from './opts';
+import type {Arch, OS} from './opts';
 import {exec} from '@actions/exec';
 
 async function cabalConfig(): Promise<string> {
@@ -25,6 +25,7 @@ export default async function run(
   try {
     core.info('Preparing to setup a Haskell environment');
     const os = process.platform as OS;
+    const arch = process.arch as Arch;
     const opts = getOpts(getDefaults(os), os, inputs);
     core.debug(`run: inputs = ${JSON.stringify(inputs)}`);
     core.debug(`run: os     = ${JSON.stringify(os)}`);
@@ -32,7 +33,7 @@ export default async function run(
 
     if (opts.ghcup.releaseChannel) {
       await core.group(`Preparing ghcup environment`, async () =>
-        addGhcupReleaseChannel(opts.ghcup.releaseChannel!, os)
+        addGhcupReleaseChannel(opts.ghcup.releaseChannel!, os, arch)
       );
     }
 
@@ -40,10 +41,10 @@ export default async function run(
       o => o[1].enable
     )) {
       await core.group(`Preparing ${t} environment`, async () =>
-        resetTool(t as Tool, resolved, os)
+        resetTool(t as Tool, resolved, os, arch)
       );
       await core.group(`Installing ${t} version ${resolved}`, async () =>
-        installTool(t as Tool, resolved, os)
+        installTool(t as Tool, resolved, os, arch)
       );
     }
 
