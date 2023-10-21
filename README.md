@@ -121,16 +121,16 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        ghc-version: ['9.6', '9.4', '9.2', '9.0', '8.10']
+        ghc-version: ['9.8, '9.6', '9.4', '9.2', '9.0']
 
         include:
           - os: windows-latest
-            ghc-version: '9.6'
+            ghc-version: '9.8'
           - os: macos-latest
-            ghc-version: '9.6'
+            ghc-version: '9.8'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up GHC ${{ matrix.ghc-version }}
         uses: haskell-actions/setup@v2
@@ -158,13 +158,15 @@ jobs:
           restore-keys: ${{ env.key }}-
 
       - name: Install dependencies
+        # If we had an exact cache hit, the dependencies will be up to date.
+        if: steps.cache.outputs.cache-hit != 'true'
         run: cabal build all --only-dependencies
 
       # Cache dependencies already here, so that we do not have to rebuild them should the subsequent steps fail.
       - name: Save cached dependencies
         uses: actions/cache/save@v3
-        # Caches are immutable, trying to save with the same key would error.
-        if: ${{ steps.cache.outputs.cache-primary-key != steps.cache.outputs.cache-matched-key }}
+        # If we had an exact cache hit, trying to save the cache would error because of key clash.
+        if: steps.cache.outputs.cache-hit != 'true'
         with:
           path: ${{ steps.setup.outputs.cabal-store }}
           key: ${{ steps.cache.outputs.cache-primary-key }}
