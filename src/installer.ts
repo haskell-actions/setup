@@ -232,9 +232,22 @@ export async function resetTool(
   }
 }
 
+async function stackArchString(arch: Arch): Promise<string> {
+  switch (arch) {
+    case 'arm64':
+      return Promise.resolve('aarch64');
+    case 'x64':
+      return Promise.resolve('x86_64');
+    default:
+      const err = `Unsupported architecture: ${arch}`;
+      core.error(err);
+      return Promise.reject(err);
+  }
+}
+
 async function stack(version: string, os: OS, arch: Arch): Promise<void> {
-  core.info(`Attempting to install stack ${version}`);
-  const binArch = arch === 'arm64' ? 'aarch64' : 'x86_64';
+  const binArch = await stackArchString(arch);
+  core.info(`Attempting to install stack ${version} for arch ${binArch}`);
   const build = {
     linux: `linux-${binArch}${
       compareVersions(version, '2.3.1') >= 0 ? '' : '-static'
@@ -326,10 +339,11 @@ async function ghcupBin(os: OS, arch: Arch): Promise<string> {
   const cachedBin = tc.find('ghcup', ghcup_version);
   if (cachedBin) return join(cachedBin, 'ghcup');
 
+  const binArch = await stackArchString(arch);
   const bin = await tc.downloadTool(
-    `https://downloads.haskell.org/ghcup/${ghcup_version}/${
-      arch === 'arm64' ? 'aarch64' : 'x86_64'
-    }-${os === 'darwin' ? 'apple-darwin' : 'linux'}-ghcup-${ghcup_version}`
+    `https://downloads.haskell.org/ghcup/${ghcup_version}/${binArch}-${
+      os === 'darwin' ? 'apple-darwin' : 'linux'
+    }-ghcup-${ghcup_version}`
   );
   await afs.chmod(bin, 0o755);
   return join(
