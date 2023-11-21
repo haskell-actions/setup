@@ -159,14 +159,14 @@ jobs:
 
       - name: Install dependencies
         # If we had an exact cache hit, the dependencies will be up to date.
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: cabal build all --only-dependencies
 
       # Cache dependencies already here, so that we do not have to rebuild them should the subsequent steps fail.
       - name: Save cached dependencies
         uses: actions/cache/save@v3
         # If we had an exact cache hit, trying to save the cache would error because of key clash.
-        if: steps.cache.outputs.cache-hit != 'true'
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         with:
           path: ${{ steps.setup.outputs.cabal-store }}
           key: ${{ steps.cache.outputs.cache-primary-key }}
