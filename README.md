@@ -121,7 +121,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        ghc-version: ['9.8, '9.6', '9.4', '9.2', '9.0']
+        ghc-version: ['9.8', '9.6', '9.4', '9.2', '9.0']
 
         include:
           - os: windows-latest
@@ -144,7 +144,7 @@ jobs:
       - name: Configure the build
         run: |
           cabal configure --enable-tests --enable-benchmarks --disable-documentation
-          cabal build --dry-run
+          cabal build all --dry-run
         # The last step generates dist-newstyle/cache/plan.json for the cache key.
 
       - name: Restore cached dependencies
