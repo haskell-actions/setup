@@ -110,8 +110,9 @@ on:
   pull_request:
     branches: [main, master]
 
-permissions:
-  contents: read
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
