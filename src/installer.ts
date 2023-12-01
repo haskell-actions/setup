@@ -4,7 +4,7 @@ import {which} from '@actions/io';
 import * as tc from '@actions/tool-cache';
 import {promises as afs} from 'fs';
 import {join, dirname} from 'path';
-import {ghcup_version, OS, Tool, releaseRevision} from './opts';
+import {ghcup_version, Arch, OS, Tool, releaseRevision} from './opts';
 import process from 'process';
 import * as glob from '@actions/glob';
 import * as fs from 'fs';
@@ -69,7 +69,8 @@ function aptVersion(tool: string, version: string): string {
 async function isInstalled(
   tool: Tool,
   version: string,
-  os: OS
+  os: OS,
+  arch: Arch
 ): Promise<boolean> {
   const toolPath = tc.find(tool, version);
   if (toolPath) return success(tool, version, toolPath, os);
@@ -103,7 +104,7 @@ async function isInstalled(
     }[os]
   };
   core.debug(`isInstalled ${tool} ${version} ${locations[tool]}`);
-  const f = await exec(await ghcupBin(os), ['whereis', tool, version]);
+  const f = await exec(await ghcupBin(os, arch), ['whereis', tool, version]);
   core.info(`\n`);
   core.debug(`isInstalled whereis ${f}`);
 
@@ -127,7 +128,7 @@ async function isInstalled(
       if (installedPath === ghcupPath) {
         // If the result of this `ghcup set` is non-zero, the version we want
         // is probably not actually installed
-        const ghcupSetResult = await exec(await ghcupBin(os), [
+        const ghcupSetResult = await exec(await ghcupBin(os, arch), [
           'set',
           tool,
           version
@@ -137,7 +138,7 @@ async function isInstalled(
         } else {
           // Andreas, 2023-05-03, issue #245.
           // Since we do not have the correct version, disable any default version.
-          await exec(await ghcupBin(os), ['unset', tool]);
+          await exec(await ghcupBin(os, arch), ['unset', tool]);
         }
       } else {
         // Install methods apt and choco have precise install paths,
@@ -152,14 +153,15 @@ async function isInstalled(
 export async function installTool(
   tool: Tool,
   version: string,
-  os: OS
+  os: OS,
+  arch: Arch
 ): Promise<void> {
-  if (await isInstalled(tool, version, os)) return;
+  if (await isInstalled(tool, version, os, arch)) return;
   warn(tool, version);
 
   if (tool === 'stack') {
-    await stack(version, os);
-    if (await isInstalled(tool, version, os)) return;
+    await stack(version, os, arch);
+    if (await isInstalled(tool, version, os, arch)) return;
     return failed(tool, version);
   }
 
@@ -183,28 +185,29 @@ export async function installTool(
         // if (!(await aptLibCurses5())) break;
         await aptLibNCurses5();
       }
-      await ghcup(tool, version, os);
-      if (await isInstalled(tool, version, os)) return;
+      await ghcup(tool, version, os, arch);
+      if (await isInstalled(tool, version, os, arch)) return;
       await apt(tool, version);
       break;
     case 'win32':
       await choco(tool, version);
-      if (await isInstalled(tool, version, os)) return;
-      await ghcup(tool, version, os);
+      if (await isInstalled(tool, version, os, arch)) return;
+      await ghcup(tool, version, os, arch);
       break;
     case 'darwin':
-      await ghcup(tool, version, os);
+      await ghcup(tool, version, os, arch);
       break;
   }
 
-  if (await isInstalled(tool, version, os)) return;
+  if (await isInstalled(tool, version, os, arch)) return;
   return failed(tool, version);
 }
 
 export async function resetTool(
   tool: Tool,
   _version: string,
-  os: OS
+  os: OS,
+  arch: Arch
 ): Promise<void> {
   if (tool === 'stack') {
     // We don't need to do anything here... yet
@@ -216,11 +219,11 @@ export async function resetTool(
   let bin = '';
   switch (os) {
     case 'linux':
-      bin = await ghcupBin(os);
+      bin = await ghcupBin(os, arch);
       await exec(bin, ['unset', tool]);
       return;
     case 'darwin':
-      bin = await ghcupBin(os);
+      bin = await ghcupBin(os, arch);
       await exec(bin, ['unset', tool]);
       return;
     case 'win32':
@@ -229,13 +232,27 @@ export async function resetTool(
   }
 }
 
-async function stack(version: string, os: OS): Promise<void> {
-  core.info(`Attempting to install stack ${version}`);
+async function stackArchString(arch: Arch): Promise<string> {
+  switch (arch) {
+    case 'arm64':
+      return Promise.resolve('aarch64');
+    case 'x64':
+      return Promise.resolve('x86_64');
+    default:
+      const err = `Unsupported architecture: ${arch}`;
+      core.error(err);
+      return Promise.reject(err);
+  }
+}
+
+async function stack(version: string, os: OS, arch: Arch): Promise<void> {
+  const binArch = await stackArchString(arch);
+  core.info(`Attempting to install stack ${version} for arch ${binArch}`);
   const build = {
-    linux: `linux-x86_64${
+    linux: `linux-${binArch}${
       compareVersions(version, '2.3.1') >= 0 ? '' : '-static'
     }`,
-    darwin: 'osx-x86_64',
+    darwin: `osx-${binArch}`,
     win32: 'windows-x86_64'
   }[os];
 
@@ -314,7 +331,7 @@ async function choco(tool: Tool, version: string): Promise<void> {
   if (tool == 'ghc') core.addPath(chocoPath);
 }
 
-async function ghcupBin(os: OS): Promise<string> {
+async function ghcupBin(os: OS, arch: Arch): Promise<string> {
   core.debug(`ghcupBin : ${os}`);
   if (os === 'win32') {
     return 'ghcup';
@@ -322,8 +339,9 @@ async function ghcupBin(os: OS): Promise<string> {
   const cachedBin = tc.find('ghcup', ghcup_version);
   if (cachedBin) return join(cachedBin, 'ghcup');
 
+  const binArch = await stackArchString(arch);
   const bin = await tc.downloadTool(
-    `https://downloads.haskell.org/ghcup/${ghcup_version}/x86_64-${
+    `https://downloads.haskell.org/ghcup/${ghcup_version}/${binArch}-${
       os === 'darwin' ? 'apple-darwin' : 'linux'
     }-ghcup-${ghcup_version}`
   );
@@ -336,16 +354,22 @@ async function ghcupBin(os: OS): Promise<string> {
 
 export async function addGhcupReleaseChannel(
   channel: URL,
-  os: OS
+  os: OS,
+  arch: Arch
 ): Promise<void> {
   core.info(`Adding ghcup release channel: ${channel}`);
-  const bin = await ghcupBin(os);
+  const bin = await ghcupBin(os, arch);
   await exec(bin, ['config', 'add-release-channel', channel.toString()]);
 }
 
-async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
+async function ghcup(
+  tool: Tool,
+  version: string,
+  os: OS,
+  arch: Arch
+): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using ghcup`);
-  const bin = await ghcupBin(os);
+  const bin = await ghcupBin(os, arch);
   if (tool === 'cabal' && version === 'head') {
     await ghcupCabalHead(os, bin);
   } else {
@@ -380,7 +404,7 @@ async function ghcupCabalHead(os: OS, bin: string): Promise<void> {
 
 async function ghcupGHCHead(): Promise<void> {
   core.info(`Attempting to install ghc head using ghcup`);
-  const bin = await ghcupBin('linux');
+  const bin = await ghcupBin('linux', 'x64');
   const returnCode = await exec(bin, [
     'install',
     'ghc',

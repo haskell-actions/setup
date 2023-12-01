@@ -14,6 +14,7 @@ export type Revisions = Record<
   Record<Tool, Array<{from: string; to: string}>>
 >;
 export type OS = 'linux' | 'darwin' | 'win32';
+export type Arch = 'arm64' | 'x64';
 export type Tool = 'cabal' | 'ghc' | 'stack';
 
 export interface ProgramOpt {
