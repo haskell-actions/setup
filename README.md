@@ -110,6 +110,10 @@ on:
   pull_request:
     branches: [main, master]
 
+# INFO: The following configuration block ensures that only one build runs per
+# branch, which is ideal for projects when the build process is costly. To
+# eliminate this behavior and ensure that the build succeeds for all commits,
+# remove this block from the CI workflow.
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
