@@ -245,7 +245,8 @@ E.g., `8.10` will be resolved to `8.10.7`, and so will `8`.
 - `latest-nightly` (requires the resp. `ghcup-release-channel`, e.g. `https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml`)
 - `latest` (default)
 - `9.8.1` `9.8`
-- `9.6.3` `9.6`
+- `9.6.4` `9.6`
+- `9.6.3`
 - `9.6.2`
 - `9.6.1`
 - `9.4.8` `9.4`
@@ -296,8 +297,8 @@ Suggestion: Try to support at least the three latest major versions of GHC.
 
 - `head` (the [cabal-head](https://github.com/haskell/cabal/releases/tag/cabal-head) release of the most recent build of the `master` branch)
 - `latest` (default, recommended)
-- `3.10.1.0` `3.10`
-- `3.10.2.0`
+- `3.10.2.0` `3.10`
+- `3.10.1.0`
 - `3.8.1.0` `3.8`
 - `3.6.2.0` `3.6`
 - `3.6.0.0`
