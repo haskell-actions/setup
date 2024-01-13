@@ -14040,6 +14040,15 @@ async function cabalConfig() {
         silent: true,
         listeners: { stdout: append, stderr: append }
     });
+    // The last line of the cabal help text is printing the config file, e.g.:
+    //
+    // > You can edit the cabal configuration file to set defaults:
+    // >   <<HOME>>/.cabal/config
+    //
+    // So trimming the last line will give us the name of the config file.
+    //
+    // Needless to say this is very brittle, but we secure this by a test
+    // in Cabal's testsuite:  https://github.com/haskell/cabal/pull/9614
     return out.toString().trim().split('\n').slice(-1)[0].trim();
 }
 async function run(inputs) {
