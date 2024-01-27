@@ -43,6 +43,14 @@ describe('haskell-actions/setup', () => {
       forAllTools(t => expect(def(os)[t].supported).toBe(supported_versions[t]))
     ));
 
+  it('Setting enable-matcher to false disables matcher', () => {
+    forAllOS(os => {
+      const options = getOpts(def(os), os, {
+        'enable-matcher': 'false'
+      });
+      expect(options.general.matcher.enable).toBe(false);
+    });
+  });
   it('Setting disable-matcher to true disables matcher', () => {
     forAllOS(os => {
       const options = getOpts(def(os), os, {
@@ -50,6 +58,25 @@ describe('haskell-actions/setup', () => {
       });
       expect(options.general.matcher.enable).toBe(false);
     });
+  });
+  it('Setting both enable-matcher to false and disable-matcher to true disables matcher', () => {
+    forAllOS(os => {
+      const options = getOpts(def(os), os, {
+        'enable-matcher': 'false',
+        'disable-matcher': 'true'
+      });
+      expect(options.general.matcher.enable).toBe(false);
+    });
+  });
+  it('Setting both enable-matcher and disable-matcher to true errors', () => {
+    forAllOS(os =>
+      expect(() =>
+        getOpts(def(os), os, {
+          'enable-matcher': 'true',
+          'disable-matcher': 'true'
+        })
+      ).toThrow()
+    );
   });
 
   it('getOpts grabs default general settings correctly from environment', () => {
@@ -148,15 +175,35 @@ describe('haskell-actions/setup', () => {
     });
   });
 
-  it('Enabling stack-no-global without setting enable-stack errors', () => {
+  it('Enabling stack-no-global but disabling enable-stack errors', () => {
     forAllOS(os =>
-      expect(() => getOpts(def(os), os, {'stack-no-global': 'true'})).toThrow()
+      expect(() =>
+        getOpts(def(os), os, {
+          'stack-no-global': 'true',
+          'enable-stack': 'false'
+        })
+      ).toThrow()
     );
   });
 
-  it('Enabling stack-setup-ghc without setting enable-stack errors', () => {
+  it('Enabling stack-no-global but setting ghc-version errors', () => {
     forAllOS(os =>
-      expect(() => getOpts(def(os), os, {'stack-setup-ghc': 'true'})).toThrow()
+      expect(() =>
+        getOpts(def(os), os, {
+          'stack-no-global': 'true',
+          'ghc-version': 'latest'
+        })
+      ).toThrow()
+    );
+  });
+  it('Enabling stack-no-global but setting cabal-version errors', () => {
+    forAllOS(os =>
+      expect(() =>
+        getOpts(def(os), os, {
+          'stack-no-global': 'true',
+          'cabal-version': 'latest'
+        })
+      ).toThrow()
     );
   });
 });

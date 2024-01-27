@@ -58,7 +58,8 @@ export type Defaults = Record<Tool, Version> & {
  *   },
  *   'enable-stack': {
  *     required: false,
- *     default: 'latest'
+ *     description: '...',
+ *     default: false
  *   },
  *   ...
  * }
@@ -74,7 +75,7 @@ export const yamlInputs: Record<string, {default: string}> = (
 
 export function getDefaults(os: OS): Defaults {
   const mkVersion = (v: string, vs: string[], t: Tool): Version => ({
-    version: resolve(yamlInputs[v].default, vs, t, os, false), // verbose=false: no printout here
+    version: resolve(yamlInputs[v].default || 'latest', vs, t, os, false), // verbose=false: no printout here
     supported: vs
   });
 
@@ -139,13 +140,60 @@ export function parseYAMLBoolean(name: string, val: string): boolean {
   );
 }
 
+function parseBooleanInput(
+  inputs: Record<string, string>,
+  name: string,
+  def: boolean
+): boolean {
+  const val = inputs[name];
+  return val ? parseYAMLBoolean(name, val) : def;
+}
+
+/**
+ * Parse two opposite boolean options, one with default 'true' and the other with default 'false'.
+ * Return the value of the positive option.
+ * E.g. 'enable-matcher: true' and 'disable-matcher: false' would result in 'true'.
+ *
+ * @param inputs    options as key-value map
+ * @param positive  name (key) of the positive option (defaults to 'true')
+ * @param negative  name (key) of the negative option (defaults to 'false')
+ */
+function parseOppositeBooleanInputs(
+  inputs: Record<string, string>,
+  positive: string,
+  negative: string
+): boolean {
+  if (!inputs[negative]) {
+    return parseBooleanInput(inputs, positive, true);
+  } else if (!inputs[positive]) {
+    return !parseBooleanInput(inputs, negative, false);
+  } else {
+    const pos = parseBooleanInput(inputs, positive, true);
+    const neg = parseBooleanInput(inputs, negative, false);
+    if (pos == !neg) {
+      return pos;
+    } else {
+      throw new Error(
+        `Action input ${positive}: ${pos} contradicts ${negative}: ${neg}`
+      );
+    }
+  }
+}
+
 export function parseURL(name: string, val: string): URL | undefined {
-  if (val === '') return undefined;
+  if (!val) return undefined;
   try {
     return new URL(val);
   } catch (e) {
     throw new TypeError(`Action input "${name}" is not a valid URL`);
   }
+}
+
+function parseURLInput(
+  inputs: Record<string, string>,
+  name: string
+): URL | undefined {
+  return parseURL(name, inputs[name]);
 }
 
 export function getOpts(
@@ -154,44 +202,60 @@ export function getOpts(
   inputs: Record<string, string>
 ): Options {
   core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
-  const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
-  const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
-  const stackEnable = (inputs['enable-stack'] || '') !== '';
-  const matcherDisable = (inputs['disable-matcher'] || '') !== '';
-  const ghcupReleaseChannel = parseURL(
-    'ghcup-release-channel',
-    inputs['ghcup-release-channel'] || ''
+  const ghcVersion = inputs['ghc-version'];
+  const cabalVersion = inputs['cabal-version'];
+  const stackVersion = inputs['stack-version'];
+  const stackNoGlobal = parseBooleanInput(inputs, 'stack-no-global', false);
+  const stackSetupGhc = parseBooleanInput(inputs, 'stack-setup-ghc', false);
+  const stackDefault = stackNoGlobal || stackSetupGhc || !!stackVersion;
+  const stackEnable = parseBooleanInput(inputs, 'enable-stack', stackDefault);
+  const ghcEnable = !stackNoGlobal;
+  const cabalEnable = !stackNoGlobal;
+  const cabalUpdate = parseBooleanInput(inputs, 'cabal-update', cabalEnable);
+  const matcherEnable = parseOppositeBooleanInputs(
+    inputs,
+    'enable-matcher',
+    'disable-matcher'
   );
-  // Andreas, 2023-01-05, issue #29:
-  // 'cabal-update' has a default value, so we should get a proper boolean always.
-  // Andreas, 2023-01-06: This is not true if we use the action as a library.
-  // Thus, need to patch with default value here.
-  const cabalUpdate = parseYAMLBoolean(
-    'cabal-update',
-    inputs['cabal-update'] || 'true'
-  );
-  core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
+  // disable-matcher is kept for backwards compatibility
+  // positive options like enable-matcher are preferable
+  const ghcupReleaseChannel = parseURLInput(inputs, 'ghcup-release-channel');
   const verInpt = {
-    ghc: inputs['ghc-version'] || ghc.version,
-    cabal: inputs['cabal-version'] || cabal.version,
-    stack: inputs['stack-version'] || stack.version
+    ghc: ghcVersion || ghc.version,
+    cabal: cabalVersion || cabal.version,
+    stack: stackVersion || stack.version
   };
 
+  // Check inputs for consistency
   const errors = [];
-  if (stackNoGlobal && !stackEnable) {
-    errors.push('enable-stack is required if stack-no-global is set');
+  if (!stackEnable) {
+    if (stackNoGlobal)
+      errors.push(
+        'Action input `enable-stack: false` contradicts `stack-no-global: true`'
+      );
+    if (stackSetupGhc)
+      errors.push(
+        'Action input `enable-stack: false` contradicts `stack-setup-ghc: true`'
+      );
+    if (stackVersion)
+      errors.push(
+        'Action input `enable-stack: false` contradicts setting `stack-version`'
+      );
   }
-
-  if (stackSetupGhc && !stackEnable) {
-    errors.push('enable-stack is required if stack-setup-ghc is set');
+  if (stackNoGlobal) {
+    if (ghcVersion)
+      errors.push(
+        'Action input `stack-no-global: true` contradicts setting `ghc-version'
+      );
+    if (cabalVersion)
+      errors.push(
+        'Action input `stack-no-global: true` contradicts setting `cabal-version'
+      );
   }
-
   if (errors.length > 0) {
     throw new Error(errors.join('\n'));
   }
 
-  const ghcEnable = !stackNoGlobal;
-  const cabalEnable = !stackNoGlobal;
   const opts: Options = {
     ghc: {
       raw: verInpt.ghc,
@@ -231,7 +295,7 @@ export function getOpts(
       enable: stackEnable,
       setup: stackSetupGhc
     },
-    general: {matcher: {enable: !matcherDisable}}
+    general: {matcher: {enable: matcherEnable}}
   };
 
   core.debug(`Options are: ${JSON.stringify(opts)}`);
