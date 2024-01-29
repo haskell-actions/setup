@@ -20,7 +20,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [macOS-13, ubuntu-latest, macOS-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -43,7 +43,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [macOS-13, ubuntu-latest, macOS-latest, windows-latest]
         plan:
           # Latest releases
           - ghc:   latest
@@ -236,7 +236,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [macOS-13, ubuntu-latest, macOS-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: ./
@@ -257,7 +257,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [macOS-13, ubuntu-latest, macOS-latest, windows-latest]
         stack: ["latest", "2.9.3"]
 
     steps:
