@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - run: git show HEAD --format='%s%n%n%b' -s > .release_body
-    - uses: softprops/action-gh-release@v1
+    - uses: softprops/action-gh-release@v2
       with:
         generate_release_notes: true
         body_path: .release_body
