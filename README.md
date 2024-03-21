@@ -298,7 +298,8 @@ Suggestion: Try to support at least the three latest major versions of GHC.
 
 - `head` (the [cabal-head](https://github.com/haskell/cabal/releases/tag/cabal-head) release of the most recent build of the `master` branch)
 - `latest` (default, recommended)
-- `3.10.2.1` `3.10`
+- `3.10.3.0` `3.10`
+- `3.10.2.1`
 - `3.10.2.0`
 - `3.10.1.0`
 - `3.8.1.0` `3.8`
@@ -315,7 +316,8 @@ Recommendation: Use the latest available version if possible.
 **Stack:** (with `enable-stack: true`)
 
 - `latest` (default, recommended)
-- `2.15.1` `2.15`
+- `2.15.3` `2.15`
+- `2.15.1`
 - `2.13.1` `2.13`
 - `2.11.1` `2.11`
 - `2.9.3` `2.9`
