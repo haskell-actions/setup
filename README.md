@@ -246,7 +246,8 @@ E.g., `8.10` will be resolved to `8.10.7`, and so will `8`.
 - `latest` (default)
 - `9.8.2` `9.8`
 - `9.8.1`
-- `9.6.4` `9.6`
+- `9.6.5` `9.6`
+- `9.6.4`
 - `9.6.3`
 - `9.6.2`
 - `9.6.1`
@@ -316,7 +317,8 @@ Recommendation: Use the latest available version if possible.
 **Stack:** (with `enable-stack: true`)
 
 - `latest` (default, recommended)
-- `2.15.3` `2.15`
+- `2.15.5` `2.15`
+- `2.15.3`
 - `2.15.1`
 - `2.13.1` `2.13`
 - `2.11.1` `2.11`
