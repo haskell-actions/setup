@@ -29,7 +29,7 @@ jobs:
     name: Hello World
     runs-on: ubuntu-latest # or macOS-latest, or windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: haskell-actions/setup@v2
       - run: runhaskell Hello.hs
 ```
@@ -44,7 +44,7 @@ jobs:
     name: Hello World
     runs-on: ubuntu-latest # or macOS-latest, or windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: haskell-actions/setup@v2
         with:
           ghc-version: '8.8' # Resolves to the latest point release of GHC 8.8
@@ -62,7 +62,7 @@ jobs:
     name: Hello World
     runs-on: ubuntu-latest # or macOS-latest, or windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: haskell-actions/setup@v2
         with:
           ghc-version: '8.8.4' # Exact version of ghc to use
@@ -91,7 +91,7 @@ jobs:
             cabal: 2.4.1.0
     name: Haskell GHC ${{ matrix.ghc }} sample
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Haskell
         uses: haskell-actions/setup@v2
         with:
@@ -152,7 +152,7 @@ jobs:
         # The last step generates dist-newstyle/cache/plan.json for the cache key.
 
       - name: Restore cached dependencies
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         id: cache
         env:
           key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
@@ -168,7 +168,7 @@ jobs:
 
       # Cache dependencies already here, so that we do not have to rebuild them should the subsequent steps fail.
       - name: Save cached dependencies
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         # If we had an exact cache hit, trying to save the cache would error because of key clash.
         if: steps.cache.outputs.cache-hit != 'true'
         with:
