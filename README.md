@@ -291,7 +291,7 @@ E.g., `8.10` will be resolved to `8.10.7`, and so will `8`.
 - `8.4.1`
 - `8.2.2` `8.2`
 - `8.0.2` `8.0`
-- `7.10.3` `7.10` (not on `ubuntu-22.04` or up)
+- `7.10.3` `7.10` (deprecated, not on `ubuntu-22.04` or up)
 
 Suggestion: Try to support at least the three latest major versions of GHC.
 
