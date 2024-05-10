@@ -200,7 +200,7 @@ jobs:
 | `stack-setup-ghc`       | If set, `enable-stack` must be set. Runs stack setup to install the specified GHC. (Note: setting this does _not_ imply `stack-no-global`.) | "boolean" | false/unset |
 | `disable-matcher`       | If set, disables match messages from GHC as GitHub CI annotations.                                                                          | "boolean" | false/unset |
 | `cabal-update`          | If set to `false`, skip `cabal update` step.                                                                                                | `boolean` | `true`      |
-| `ghcup-release-channel` | If set, add a [release channel](https://www.haskell.org/ghcup/guide/#metadata) to ghcup.                                        | `URL`     | none        |
+| `ghcup-release-channel` | If set, add a [release channel](https://www.haskell.org/ghcup/guide/#metadata) to ghcup.                                                    | `URL`     | none        |
 
 Note: "boolean" types are set/unset, not true/false.
 That is, setting any "boolean" to a value other than the empty string (`""`) will be considered true/set.
@@ -228,6 +228,7 @@ and `ghc-exe` and `ghc-path` will be set accordingly.
 | `stack-path`    | The path of the `stack` executable _directory_                                                                             | string |
 | `cabal-store`   | The path to the cabal store                                                                                                | string |
 | `stack-root`    | The path to the stack root (equal to the `STACK_ROOT` environment variable if it is set; otherwise an OS-specific default) | string |
+| `ghcup-command` | The path of the `ghcup` _executable_. Might not be an absolute file path.                                                  | string |
 
 ## Version Support
 
