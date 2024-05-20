@@ -200,7 +200,7 @@ jobs:
 | `stack-setup-ghc`       | If set, `enable-stack` must be set. Runs stack setup to install the specified GHC. (Note: setting this does _not_ imply `stack-no-global`.) | "boolean" | false/unset |
 | `disable-matcher`       | If set, disables match messages from GHC as GitHub CI annotations.                                                                          | "boolean" | false/unset |
 | `cabal-update`          | If set to `false`, skip `cabal update` step.                                                                                                | `boolean` | `true`      |
-| `ghcup-release-channel` | If set, add a [release channel](https://www.haskell.org/ghcup/guide/#metadata) to ghcup.                                        | `URL`     | none        |
+| `ghcup-release-channel` | If set, add a [release channel](https://www.haskell.org/ghcup/guide/#metadata) to ghcup.                                                    | `URL`     | none        |
 
 Note: "boolean" types are set/unset, not true/false.
 That is, setting any "boolean" to a value other than the empty string (`""`) will be considered true/set.
@@ -318,7 +318,8 @@ Recommendation: Use the latest available version if possible.
 **Stack:** (with `enable-stack: true`)
 
 - `latest` (default, recommended)
-- `2.15.5` `2.15`
+- `2.15.7` `2.15`
+- `2.15.5`
 - `2.15.3`
 - `2.15.1`
 - `2.13.1` `2.13`
