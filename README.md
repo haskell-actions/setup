@@ -318,7 +318,8 @@ Recommendation: Use the latest available version if possible.
 **Stack:** (with `enable-stack: true`)
 
 - `latest` (default, recommended)
-- `2.15.5` `2.15`
+- `2.15.7` `2.15`
+- `2.15.5`
 - `2.15.3`
 - `2.15.1`
 - `2.13.1` `2.13`
