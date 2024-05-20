@@ -2,7 +2,7 @@
 
 ### Pre-requisites
 
-- Node.js v16
+- Node.js v20
 - NPM
 
 ### Checkin
