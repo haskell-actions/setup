@@ -100,6 +100,21 @@ jobs:
       - run: runhaskell Hello.hs
 ```
 
+### Multiple GHC versions
+
+If you need multiple versions of GHC installed at the same time, it is possible
+to run the action twice.
+
+```yaml
+    - uses: haskell-actions/setup@v2
+      with:
+        ghc-version: '9.8.2'
+
+    - uses: haskell-actions/setup@v2
+      with:
+        ghc-version: '8.10.7'
+```
+
 ### Model cabal workflow with caching
 
 ```yaml
