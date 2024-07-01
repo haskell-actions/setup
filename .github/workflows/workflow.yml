@@ -49,23 +49,32 @@ jobs:
           # Latest releases
           - ghc:   latest
             cabal: latest
+            cabal_update: "true"
+          # cabal-3.12 build always needs a repo, so, `cabal update` is mandatory
 
           # Latest ghc with cabal head
           - ghc:   latest
             cabal: head
+            cabal_update: "true"
 
           # Recent releases
 
+          - ghc:   "9.8"
+            cabal: "3.10"
+            cabal_update: "false"
+
           - ghc:   "9.6"
             cabal: "3.10"
+            cabal_update: "true"
+          # Test #210 (XDG): is the cabal store-dir set to something meaningful?
 
           - ghc:   "9.4"
             cabal: "3.8"
+            cabal_update: "false"
 
           - ghc:   "9.2"
             cabal: "3.6"
-
-        cabal_update: ["false"]
+            cabal_update: "false"
 
         # The following tests do not set 'cabal-update', which defaults to 'true' then.
 
@@ -95,29 +104,15 @@ jobs:
             plan:
               ghc:   "8.6"
               cabal: "2.4"
-            cabal_update: "true"
+              cabal_update: "true"
             # cabal update needed here since cabal-2.4 is still v1
-
-          # Test #210 (XDG): is the cabal store-dir set to something meaningful?
-          - os:  ubuntu-latest
-            plan:
-              ghc:   "9.6"
-              cabal: "3.10"
-            cabal_update: "true"
-
-          # With choco, cabal 3.10.1.0 should map to 3.10.1.1
-          - os:  windows-latest
-            plan:
-              ghc:   "9.6"
-              cabal: "3.10"
-            cabal_update: "true"
 
           # Test some old versions
           - os: ubuntu-latest
             plan:
               ghc:   "8.2.2"
               cabal: "2.4.1.0"
-            cabal_update: "false"
+              cabal_update: "false"
 
           # Test ghcup pre-release channel
           - os: ubuntu-latest
@@ -188,7 +183,7 @@ jobs:
           ghc-version: ${{ matrix.plan.ghc }}
           ghcup-release-channel: ${{ matrix.ghcup_release_channel }}
           cabal-version: ${{ matrix.plan.cabal }}
-          cabal-update: ${{ matrix.cabal_update }}
+          cabal-update: ${{ matrix.plan.cabal_update }}
 
       - name: Show installed versions and PATH
         run: |
@@ -248,7 +243,7 @@ jobs:
         # This tests whether the default installdir has been added to the PATH (issue #130).
 
       - name: Build and run test with Hackage dependency
-        if:   ${{ matrix.cabal_update != 'false' }}
+        if:   ${{ matrix.plan.cabal_update != 'false' }}
         working-directory: __tests__/project-with-hackage-dependency
         run:  cabal build && cabal run
 

@@ -106,13 +106,13 @@ If you need multiple versions of GHC installed at the same time, it is possible
 to run the action twice.
 
 ```yaml
-    - uses: haskell-actions/setup@v2
-      with:
-        ghc-version: '9.8.2'
+- uses: haskell-actions/setup@v2
+  with:
+    ghc-version: '9.8.2'
 
-    - uses: haskell-actions/setup@v2
-      with:
-        ghc-version: '8.10.7'
+- uses: haskell-actions/setup@v2
+  with:
+    ghc-version: '8.10.7'
 ```
 
 ### Model cabal workflow with caching
@@ -315,6 +315,7 @@ Suggestion: Try to support at least the three latest major versions of GHC.
 
 - `head` (the [cabal-head](https://github.com/haskell/cabal/releases/tag/cabal-head) release of the most recent build of the `master` branch)
 - `latest` (default, recommended)
+- `3.12.1.0` `3.12`
 - `3.10.3.0` `3.10`
 - `3.10.2.1`
 - `3.10.2.0`
