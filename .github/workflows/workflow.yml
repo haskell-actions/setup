@@ -104,7 +104,10 @@ jobs:
             plan:
               ghc:   "8.6"
               cabal: "2.4"
-              cabal_update: "true"
+              cabal_update: "false"
+            # Setting cabal_update to "true" will try to build the test project
+            # with hackage dependencies, but something goes wrong.
+            # TODO: figure out what.
             # cabal update needed here since cabal-2.4 is still v1
 
           # Test some old versions
