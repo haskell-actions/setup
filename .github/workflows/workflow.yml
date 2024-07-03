@@ -289,7 +289,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        stack: ["latest", "2.9.3"]
+        stack: ["latest", "2.15.5"]
+          # test latest and recommended version of stack
 
     steps:
       - uses: actions/checkout@v4
@@ -310,7 +311,7 @@ jobs:
           # NB: we invoke `stack path` twice, because the first time it
           # might install things (like MSYS2 on Windows) which clobber the output.
         run: |
-          stack path --system-ghc
+          stack path --system-ghc --stack-root
           expected_stack_root=$(stack path --system-ghc --stack-root)
 
           if [ "${expected_stack_root}" != "${{ steps.setup.outputs.stack-root }}" ]; then
