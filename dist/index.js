@@ -13390,7 +13390,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.addGhcupReleaseChannel = exports.resetTool = exports.installTool = void 0;
+exports.addGhcupReleaseChannel = exports.resetTool = exports.installTool = exports.configureGhcupOutput = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec_1 = __nccwpck_require__(1514);
 const io_1 = __nccwpck_require__(7436);
@@ -13407,6 +13407,11 @@ const exec = async (cmd, args) => (0, exec_1.exec)(cmd, args, { ignoreReturnCode
 function failed(tool, version) {
     throw new Error(`All install methods for ${tool} ${version} failed`);
 }
+async function configureGhcupOutput(os, arch) {
+    const bin = await ghcupBin(os, arch);
+    core.setOutput('ghcup-command', bin);
+}
+exports.configureGhcupOutput = configureGhcupOutput;
 async function configureOutputs(tool, version, path, os) {
     core.setOutput(`${tool}-path`, path);
     core.setOutput(`${tool}-exe`, await (0, io_1.which)(tool));
@@ -14060,6 +14065,7 @@ async function run(inputs) {
         core.debug(`run: inputs = ${JSON.stringify(inputs)}`);
         core.debug(`run: os     = ${JSON.stringify(os)}`);
         core.debug(`run: opts   = ${JSON.stringify(opts)}`);
+        await (0, installer_1.configureGhcupOutput)(os, arch);
         if (opts.ghcup.releaseChannel) {
             await core.group(`Preparing ghcup environment`, async () => (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel, os, arch));
         }

@@ -45,6 +45,8 @@ outputs:
     description: 'The resolved version of stack'
   ghc-exe:
     description: 'The path of the ghc _executable_'
+  ghcup-command:
+    description: 'The path of the ghcup _executable_'
   cabal-exe:
     description: 'The path of the cabal _executable_'
   stack-exe:
