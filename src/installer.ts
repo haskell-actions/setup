@@ -18,6 +18,11 @@ function failed(tool: Tool, version: string): void {
   throw new Error(`All install methods for ${tool} ${version} failed`);
 }
 
+export async function configureGhcupOutput(os: OS, arch: Arch): Promise<void> {
+  const bin = await ghcupBin(os, arch);
+  core.setOutput('ghcup-command', bin);
+}
+
 async function configureOutputs(
   tool: Tool,
   version: string,

@@ -5,7 +5,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {EOL} from 'os';
 import {getOpts, getDefaults, Tool} from './opts';
-import {addGhcupReleaseChannel, installTool, resetTool} from './installer';
+import {
+  addGhcupReleaseChannel,
+  configureGhcupOutput,
+  installTool,
+  resetTool
+} from './installer';
 import type {Arch, OS} from './opts';
 import {exec} from '@actions/exec';
 
@@ -39,6 +44,8 @@ export default async function run(
     core.debug(`run: inputs = ${JSON.stringify(inputs)}`);
     core.debug(`run: os     = ${JSON.stringify(os)}`);
     core.debug(`run: opts   = ${JSON.stringify(opts)}`);
+
+    await configureGhcupOutput(os, arch);
 
     if (opts.ghcup.releaseChannel) {
       await core.group(`Preparing ghcup environment`, async () =>
