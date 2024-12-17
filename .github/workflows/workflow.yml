@@ -111,12 +111,18 @@ jobs:
             # cabal update needed here since cabal-2.4 is still v1
 
           # Test some old versions
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             plan:
               ghc:   "8.2.2"
               cabal: "2.4.1.0"
               cabal_update: "false"
 
+          - os: ubuntu-24.04
+            plan:
+              ghc:   "8.0.2"
+              cabal: "2.4.1.0"
+              cabal_update: "false"
+  
           # Test ghcup pre-release channel
           - os: ubuntu-latest
             ghcup_release_channel: "https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-prereleases-0.0.7.yaml"
