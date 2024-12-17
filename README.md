@@ -259,6 +259,7 @@ E.g., `8.10` will be resolved to `8.10.7`, and so will `8`.
 
 - `latest-nightly` (requires the resp. `ghcup-release-channel`, e.g. `https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml`)
 - `latest` (default)
+- `9.12.1` `9.12`
 - `9.10.1` `9.10`
 - `9.8.4` `9.8`
 - `9.8.2`
