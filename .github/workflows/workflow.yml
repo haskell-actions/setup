@@ -59,6 +59,10 @@ jobs:
 
           # Recent releases
 
+          - ghc:   "9.10"
+            cabal: "3.12"
+            cabal_update: "true"
+
           - ghc:   "9.8"
             cabal: "3.10"
             cabal_update: "false"
