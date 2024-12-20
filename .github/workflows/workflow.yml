@@ -117,6 +117,12 @@ jobs:
               cabal: "2.4.1.0"
               cabal_update: "false"
 
+          - os: ubuntu-22.04
+            plan:
+              ghc:   "8.0"
+              cabal: "2.4.1.0"
+              cabal_update: "false"
+
           # Test some old versions
           - os: ubuntu-latest
             plan:
