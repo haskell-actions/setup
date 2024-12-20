@@ -280,10 +280,15 @@ async function aptLibNCurses5(): Promise<boolean> {
     `Installing libcurses5 and libtinfo5 using apt-get (for ghc < 8.3)`
   );
 
-  const returnCode = await exec(
+  // ubuntu-24.04 requires the specific source to install libncurses5 and libtinfo5,
+  // see https://github.com/haskell-actions/setup/issues/101
+  const configCode = await exec(
+    `sudo -- sh -c "echo 'deb http://security.ubuntu.com/ubuntu focal-security main universe' > /etc/apt/sources.list.d/ubuntu-focal-sources.list"`
+  );
+  const installCode = await exec(
     `sudo -- sh -c "apt-get update && apt-get -y install libncurses5 libtinfo5"`
   );
-  return returnCode === 0;
+  return configCode === 0 && installCode === 0;
 }
 
 async function apt(tool: Tool, version: string): Promise<void> {
