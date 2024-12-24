@@ -1,4 +1,3 @@
-/// <reference types="node" />
 export declare const release_revisions: Revisions;
 export declare const supported_versions: Record<Tool, string[]>;
 export declare const ghcup_version: string;
