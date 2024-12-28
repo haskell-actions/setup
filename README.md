@@ -243,6 +243,7 @@ and `ghc-exe` and `ghc-path` will be set accordingly.
 | `stack-path`    | The path of the `stack` executable _directory_                                                                             | string |
 | `cabal-store`   | The path to the cabal store                                                                                                | string |
 | `stack-root`    | The path to the stack root (equal to the `STACK_ROOT` environment variable if it is set; otherwise an OS-specific default) | string |
+| `ghcup-command` | The path of the `ghcup` _executable_. Might not be an absolute file path.                                                  | string |
 
 ## Version Support
 
