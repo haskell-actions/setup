@@ -200,8 +200,10 @@ jobs:
         run: cabal check
 
       - name: Build documentation
-        run: cabal haddock all
+        run: cabal haddock all --disable-documentation
 ```
+
+(Alternatively, the two occurrences of `--disable-documentation` can be changed to `--enable-documentation`, for resolving the external references in the haddockumentation.)
 
 ## Inputs
 
