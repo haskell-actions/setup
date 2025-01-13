@@ -200,10 +200,15 @@ jobs:
         run: cabal check
 
       - name: Build documentation
-        run: cabal haddock all --disable-documentation
+        run:
+          cabal haddock all --disable-documentation
+          # --disable-documentation disables building documentation for dependencies.
+          # The package's own documentation is still built,
+          # yet contains no links to the documentation of the dependencies.
 ```
 
-(Alternatively, the two occurrences of `--disable-documentation` can be changed to `--enable-documentation`, for resolving the external references in the haddockumentation.)
+Alternatively, the two occurrences of `--disable-documentation` can be changed to `--enable-documentation`, for resolving the external references to the documentation of the dependencies.
+This will increase built times a bit, though.
 
 ## Inputs
 
