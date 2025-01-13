@@ -208,7 +208,7 @@ jobs:
 ```
 
 Alternatively, the two occurrences of `--disable-documentation` can be changed to `--enable-documentation`, for resolving the external references to the documentation of the dependencies.
-This will increase built times a bit, though.
+This will increase build times a bit, though.
 
 ## Inputs
 
