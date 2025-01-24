@@ -188,3 +188,40 @@ jobs:
 
 Alternatively, the two occurrences of `--disable-documentation` can be changed to `--enable-documentation`, for resolving the external references to the documentation of the dependencies.
 This will increase build times a bit, though.
+
+### Dependency updates
+
+You can use [Renovate](https://www.mend.io/renovate/) to detect
+if dependencies do not allow the latest version.
+
+If you install [the Renovate Github app](https://github.com/apps/renovate), it
+will submit a PR with configuration to your repository.
+
+The following option can be added to that PR. It embeds new dependency versions in a
+[git trailer](https://alchemists.io/articles/git_trailers):
+
+```
+"commitBody": "New-Versions:\n{{#each upgrades}}  {{{depName}}}=={{{newVersion}}}\n{{/each}}"
+```
+
+These new versions can then be saved to `cabal.project` in a workflow step.
+Insert the following before the `cabal configure` step:
+
+```
+- name: Extract New-Versions git trailer from Renovate
+  if: ${{ github.event_name == "pull_request" }}
+  run: |
+    if [ ! -f cabal.project ]
+      then echo "packages: ." > cabal.project
+    fi
+    for constraint in $(git log "--format=%(trailers:key=New-Versions,valueonly=true)" ${{ github.event.pull_request.head.sha }} -1)
+      do echo "constraints: $constraint" >> cabal.project
+    done
+```
+
+Note that a Cabal constraint can't change the version of GHC used. So you may
+want to add [ignoreDeps](https://docs.renovatebot.com/configuration-options/#ignoredeps)
+to ignore updates for [boot libraries](https://gitlab.haskell.org/ghc/ghc/-/wikis/commentary/libraries/version-history).
+
+You can also enable [osvVulnerabilityAlerts](https://docs.renovatebot.com/configuration-options/#osvvulnerabilityalerts) to receive
+alerts from the [Haskell Security Advisory Database](https://haskell.github.io/security-advisories/).
