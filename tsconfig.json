@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2021",
-    "lib": ["ES2021"],
+    "target": "esnext",
+    "lib": ["ESNEXT"],
     "module": "commonjs",
     "incremental": true,
     "strict": true,
