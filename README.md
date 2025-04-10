@@ -81,7 +81,8 @@ E.g., `8.10` will be resolved to `8.10.7`, and so will `8`.
 - `9.8.4` `9.8`
 - `9.8.2`
 - `9.8.1`
-- `9.6.6` `9.6`
+- `9.6.7` `9.6`
+- `9.6.6`
 - `9.6.5`
 - `9.6.4`
 - `9.6.3`
@@ -156,6 +157,7 @@ Recommendation: Use the latest available version if possible.
 **Stack:** (with `enable-stack: true`)
 
 - `latest` (default, recommended)
+- `3.5.1` `3.5`
 - `3.3.1` `3.3`
 - `3.1.1` `3.1`
 - `2.15.7` `2.15`
