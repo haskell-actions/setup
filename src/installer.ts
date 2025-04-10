@@ -177,7 +177,8 @@ export async function installTool(
       // so guard “compareVersions” with “validate”.
       if (
         tool === 'ghc' &&
-        (!validate(version) || compareVersions('8.3', version))
+        validate(version) &&
+        compareVersions(version, '8.3') < 0 // meaning version < 8.3
       ) {
         // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
         // Atm, I do not know how to check whether we are on ubuntu-20.04.
