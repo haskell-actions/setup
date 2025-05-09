@@ -77,7 +77,8 @@ E.g., `8.10` will be resolved to `8.10.7`, and so will `8`.
 - `latest` (default)
 - `9.12.2` `9.12`
 - `9.12.1`
-- `9.10.1` `9.10`
+- `9.10.2` `9.10`
+- `9.10.1`
 - `9.8.4` `9.8`
 - `9.8.2`
 - `9.8.1`
@@ -136,7 +137,8 @@ Suggestion: Try to support at least the three latest major versions of GHC.
 
 - `head` (the [cabal-head](https://github.com/haskell/cabal/releases/tag/cabal-head) release of the most recent build of the `master` branch)
 - `latest` (default, recommended)
-- `3.14.1.1` `3.14`
+- `3.14.2.0` `3.14`
+- `3.14.1.1`
 - `3.14.1.0`
 - `3.12.1.0` `3.12`
 - `3.10.3.0` `3.10`
