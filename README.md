@@ -11,7 +11,6 @@ This action sets up a Haskell environment for use in actions by:
 The GitHub runners come with [pre-installed versions of GHC and Cabal](https://github.com/actions/runner-images).
 Those will be used whenever possible.
 For all other versions, this action utilizes
-[`ppa:hvr/ghc`](https://launchpad.net/~hvr/+archive/ubuntu/ghc),
 [`ghcup`](https://github.com/haskell/ghcup-hs), and
 [`chocolatey`](https://chocolatey.org/packages/ghc).
 

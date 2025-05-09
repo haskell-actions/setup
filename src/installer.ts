@@ -60,12 +60,6 @@ function warn(tool: Tool, version: string): void {
   );
 }
 
-function aptVersion(tool: string, version: string): string {
-  // For Cabal, extract the first two segments of the version number.
-  // This regex is intentionally liberal to accommodate unusual cases like "head".
-  return tool === 'cabal' ? /[^.]*\.?[^.]*/.exec(version)![0] : version;
-}
-
 async function isInstalled(
   tool: Tool,
   version: string,
@@ -79,10 +73,6 @@ async function isInstalled(
   const ghcupPath =
     os === 'win32' ? 'C:/ghcup/bin' : `${process.env.HOME}/.ghcup/bin`;
 
-  // Path where apt installs binaries of a tool
-  const v = aptVersion(tool, version);
-  const aptPath = `/opt/${tool}/${v}/bin`;
-
   // Path where choco installs binaries of a tool
   const chocoPath = await getChocoPath(
     tool,
@@ -94,12 +84,12 @@ async function isInstalled(
     stack: [], // Always installed into the tool cache
     cabal: {
       win32: [chocoPath, ghcupPath],
-      linux: [aptPath, ghcupPath],
+      linux: [ghcupPath],
       darwin: [ghcupPath]
     }[os],
     ghc: {
       win32: [chocoPath, ghcupPath],
-      linux: [aptPath, ghcupPath],
+      linux: [ghcupPath],
       darwin: [ghcupPath]
     }[os]
   };
@@ -141,7 +131,7 @@ async function isInstalled(
           await exec(await ghcupBin(os, arch), ['unset', tool]);
         }
       } else {
-        // Install methods apt and choco have precise install paths,
+        // Install method choco has precise install paths,
         // so if the install path is present, the tool should be present, too.
         return success(tool, version, installedPath, os);
       }
@@ -187,8 +177,6 @@ export async function installTool(
         await aptLibNCurses5();
       }
       await ghcup(tool, version, os, arch);
-      if (await isInstalled(tool, version, os, arch)) return;
-      await apt(tool, version);
       break;
     case 'win32':
       await choco(tool, version);
@@ -290,16 +278,6 @@ async function aptLibNCurses5(): Promise<boolean> {
     `sudo -- sh -c "apt-get update && apt-get -y install libncurses5 libtinfo5"`
   );
   return returnCode === 0;
-}
-
-async function apt(tool: Tool, version: string): Promise<void> {
-  const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
-  const v = aptVersion(tool, version);
-  core.info(`Attempting to install ${toolName} ${v} using apt-get`);
-  // Ignore the return code so we can fall back to ghcup
-  await exec(
-    `sudo -- sh -c "add-apt-repository -y ppa:hvr/ghc && apt-get update && apt-get -y install ${toolName}-${v}"`
-  );
 }
 
 async function choco(tool: Tool, version: string): Promise<void> {
