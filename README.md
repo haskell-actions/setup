@@ -143,15 +143,8 @@ Suggestion: Try to support at least the three latest major versions of GHC.
 - `3.10.3.0` `3.10`
 - `3.10.2.1`
 - `3.10.2.0`
-- `3.10.1.0`
-- `3.8.1.0` `3.8`
-- `3.6.2.0` `3.6`
-- `3.6.0.0`
-- `3.4.1.0` `3.4`
-- `3.4.0.0`
-- `3.2.0.0` `3.2`
-- `3.0.0.0` `3.0`
-- `2.4.1.0` `2.4`
+
+Older versions of `cabal` are not supported due to vulnerability [HSEC-2023-0015](https://github.com/haskell/security-advisories/blob/cea5781acfc2adb9bc02486497d782072c613bb6/advisories/hackage/cabal-install/HSEC-2023-0015.md).
 
 Recommendation: Use the latest available version if possible.
 

@@ -77,11 +77,11 @@ jobs:
           # Test #210 (XDG): is the cabal store-dir set to something meaningful?
 
           - ghc:   "9.4"
-            cabal: "3.8"
+            cabal: "3.10.2.1"
             cabal_update: "false"
 
           - ghc:   "9.2"
-            cabal: "3.6"
+            cabal: "3.10.2.0"
             cabal_update: "false"
 
         # The following tests do not set 'cabal-update', which defaults to 'true' then.
@@ -96,62 +96,59 @@ jobs:
               cabal: latest
               cabal_update: "true"
 
-          # Some previously recommended releases of ghc with matching cabal
+          # Some previously recommended releases of ghc with supported cabal
 
           - os: macos-13
               # GHC 9.0 does not work on macos-14 (LLVM problem #77)
             plan:
               ghc:   "9.0"
-              cabal: "3.4"
+              cabal: "3.10"
 
           - os:  ubuntu-latest
             plan:
               ghc:   "8.10"
-              cabal: "3.2"
+              cabal: "3.14.1.1"
 
           - os:  ubuntu-latest
             plan:
               ghc:   "8.8"
-              cabal: "3.0"
+              cabal: "3.14.1.0"
               # cabal-3.0 install might have the Windows symlinking problem
               # https://github.com/haskell/cabal/issues/5748
 
           - os:  ubuntu-latest
             plan:
               ghc:   "8.6"
-              cabal: "2.4"
-              cabal_update: "false"
-            # Setting cabal_update to "true" will try to build the test project
-            # with hackage dependencies, but something goes wrong.
-            # TODO: figure out what.
-            # cabal update needed here since cabal-2.4 is still v1
+              cabal: "3.12.1.0"
+              cabal_update: "true"
 
           # Test on ubuntu-24.04 with older ghc
           - os: ubuntu-24.04
             plan:
               ghc:   "8.0"
-              cabal: "2.4.1.0"
+              cabal: "3.10.3.0"
               cabal_update: "false"
 
           - os: ubuntu-22.04
             plan:
               ghc:   "8.0"
-              cabal: "2.4.1.0"
+              cabal: "3.10.2.1"
               cabal_update: "false"
 
           # Test some old versions
           - os: ubuntu-latest
             plan:
               ghc:   "8.2.2"
-              cabal: "2.4.1.0"
+              cabal: "3.10.2.0"
               cabal_update: "false"
 
           # Test ghcup pre-release channel
           - os: ubuntu-latest
             ghcup_release_channel: "https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-prereleases-0.0.9.yaml"
             plan:
-              ghc:   "9.6.0.20230111"
-              cabal: "3.8"
+              ghc:   "9.12.1.20250219"
+               # 2025-07-29: just not out yet: "9.10.2.20250725"
+              cabal: "latest"
 
           # Test ghc nightly
           - os: ubuntu-latest
@@ -160,52 +157,6 @@ jobs:
             plan:
               ghc:   "latest-nightly"
               cabal: "latest"
-
-          ## Andreas, 2024-05-03, deprecate GHC 7, do not test it any longer
-          #
-          # - os: ubuntu-20.04
-          #   plan:
-          #     ghc:   "7.4.2"
-          #     cabal: "3.4"
-          #     # ubuntu-20.04/hvr has of GHC 7 just 7.0.1, 7.0.4, 7.2.2, 7.4.2, 7.10.3
-          #     # and of cabal just 2.4, 3.0, 3.2, 3.4
-          #     # according to https://launchpad.net/~hvr/+archive/ubuntu/ghc?field.series_filter=focal
-          #
-          # # setup does something special for 7.10.3 (issue #79)
-          # - os: ubuntu-20.04
-          #   plan:
-          #     ghc:   "7.10.3"
-          #     cabal: "3.6"
-          # - os: macOS-latest
-          #   plan:
-          #     ghc:   "7.10.3"
-          #     cabal: "3.4"
-          #
-          # # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
-          # - os: windows-latest
-          #   plan:
-          #     ghc:   "7.10"
-          #     cabal: "3.0"
-
-          ## Andreas, 2024-05-03, stop testing old minor versions
-          #
-          # # Test for issue #129: GHC 9.4.3 failed to install on windows (choco)
-          # - os: windows-latest
-          #   plan:
-          #     ghc:   "9.4.3"
-          #     cabal: "3.8.1.0"
-
-          # # Test ghcup on windows (PR #206) which choco does not have 9.4.5
-          # - os: windows-latest
-          #   plan:
-          #     ghc:   "9.4.5"
-          #     cabal: "3.8"
-
-          # # Test GHC 9.4.4 on windows (Issue #245)
-          # - os: windows-latest
-          #   plan:
-          #     ghc:   "9.4.4"
-          #     cabal: "3.10.1.0"
 
     steps:
       - uses: actions/checkout@v4
