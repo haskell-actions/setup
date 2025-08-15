@@ -35679,16 +35679,31 @@ async function cabalConfig() {
         silent: true,
         listeners: { stdout: append, stderr: append }
     });
-    // The last line of the cabal help text is printing the config file, e.g.:
-    //
-    // > You can edit the cabal configuration file to set defaults:
-    // >   <<HOME>>/.cabal/config
-    //
-    // So trimming the last line will give us the name of the config file.
-    //
-    // Needless to say this is very brittle, but we secure this by a test
-    // in Cabal's testsuite:  https://github.com/haskell/cabal/pull/9614
-    return out.toString().trim().split('\n').slice(-1)[0].trim();
+    return configFileFromHelpText(out.toString());
+}
+// The end of the cabal help text is printing the config file, e.g.:
+//
+// > You can edit the cabal configuration file to set defaults:
+// >   <<HOME>>/.cabal/config
+// > This file will be generated with sensible defaults if you run 'cabal update'.
+//
+// The last line here is only printed if the file does not exist yet.
+//
+// So trimming last following "You can edit..." will give us the name of the config file.
+//
+// Needless to say this is very brittle, but we secure this by a test
+// in Cabal's testsuite:  https://github.com/haskell/cabal/pull/9614
+//
+function configFileFromHelpText(txt) {
+    const marker = 'You can edit the cabal configuration file to set defaults:';
+    const lines = txt.split('\n').map(line => line.trim());
+    const foundIndex = lines.findLastIndex(line => line === marker);
+    if (foundIndex !== -1 && foundIndex + 1 < lines.length) {
+        return lines[foundIndex + 1];
+    }
+    else {
+        return '';
+    }
 }
 async function run(inputs) {
     try {
