@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')  # only run on "releases" (pushes to tags)
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - run: git show HEAD --format='%s%n%n%b' -s > .release_body
     - uses: softprops/action-gh-release@v2
       with:
