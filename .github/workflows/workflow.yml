@@ -88,21 +88,21 @@ jobs:
 
         include:
 
-          # Future macos
+          # Other macos
 
-          - os: macos-15
+          - os: macos-15-intel
+            plan:
+              ghc:   latest
+              cabal: latest
+              cabal_update: "true"
+
+          - os: macos-14
             plan:
               ghc:   latest
               cabal: latest
               cabal_update: "true"
 
           # Some previously recommended releases of ghc with supported cabal
-
-          - os: macos-13
-              # GHC 9.0 does not work on macos-14 (LLVM problem #77)
-            plan:
-              ghc:   "9.0"
-              cabal: "3.10"
 
           - os:  ubuntu-latest
             plan:
