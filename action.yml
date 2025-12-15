@@ -60,5 +60,5 @@ outputs:
   stack-root:
     description: 'The path to the stack root (equal to the STACK_ROOT environment variable if it is set; otherwise an OS-specific default)'
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/index.js'
