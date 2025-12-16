@@ -343,7 +343,7 @@ jobs:
         with:
           ghc-version: latest
           cabal-version: latest
-          enable-stack: false
+          # enable-stack: 'false'
 
       - name: Show installed versions and PATH
         run: |
