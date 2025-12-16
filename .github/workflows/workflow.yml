@@ -16,305 +16,306 @@ defaults:
 
 jobs:
 
-  # test:
-  #   name: Unit Tests - ${{ matrix.os }}
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-latest, macOS-latest, windows-latest]
-  #   steps:
-  #     - uses: actions/checkout@v6
-  #     - uses: actions/setup-node@v6
-  #       with:
-  #         node-version: "24"
-  #         cache: "npm"
-  #         cache-dependency-path: package-lock.json
-  #     - run: npm ci --prefer-offline --no-audit --progress=false
-  #     - run: npm run bundle
-  #     - run: npm test
-  #     - name: Ensure generated files are up-to-date
-  #       run: git diff --exit-code dist/ lib/
+  test:
+    name: Unit Tests - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
+      - run: npm ci --prefer-offline --no-audit --progress=false
+      - run: npm run bundle
+      - run: npm test
+      - name: Ensure generated files are up-to-date
+        run: git diff --exit-code dist/ lib/
 
-  # install-haskell:
-  #   name: GHC ${{ matrix.plan.ghc }}, Cabal ${{ matrix.plan.cabal }} - ${{ matrix.os }}
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
+  install-haskell:
+    name: GHC ${{ matrix.plan.ghc }}, Cabal ${{ matrix.plan.cabal }} - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
 
-  #     # Let's see how the other installs are doing and not fail on the first
-  #     fail-fast: false
+      # Let's see how the other installs are doing and not fail on the first
+      fail-fast: false
 
-  #     matrix:
-  #       os: [ubuntu-latest, macOS-latest, windows-latest]
-  #       plan:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        plan:
 
-  #         # Latest releases
-  #         - ghc:   latest
-  #           cabal: latest
-  #           cabal_update: "true"
-  #         # cabal-3.12 build always needs a repo, so, `cabal update` is mandatory
+          # Latest releases
+          - ghc:   latest
+            cabal: latest
+            cabal_update: "true"
+          # cabal-3.12 build always needs a repo, so, `cabal update` is mandatory
 
-  #         # Latest ghc with cabal head
-  #         - ghc:   latest
-  #           cabal: head
-  #           cabal_update: "true"
+          # Latest ghc with cabal head
+          - ghc:   latest
+            cabal: head
+            cabal_update: "true"
 
-  #         # Recent releases
+          # Recent releases
 
-  #         - ghc:   "9.12"
-  #           cabal: "3.14"
-  #           cabal_update: "true"
+          - ghc:   "9.12"
+            cabal: "3.14"
+            cabal_update: "true"
 
-  #         - ghc:   "9.10"
-  #           cabal: "3.12"
-  #           cabal_update: "true"
+          - ghc:   "9.10"
+            cabal: "3.12"
+            cabal_update: "true"
 
-  #         - ghc:   "9.8"
-  #           cabal: "3.10"
-  #           cabal_update: "false"
+          - ghc:   "9.8"
+            cabal: "3.10"
+            cabal_update: "false"
 
-  #         - ghc:   "9.6"
-  #           cabal: "3.10"
-  #           cabal_update: "true"
-  #         # Test #210 (XDG): is the cabal store-dir set to something meaningful?
+          - ghc:   "9.6"
+            cabal: "3.10"
+            cabal_update: "true"
+          # Test #210 (XDG): is the cabal store-dir set to something meaningful?
 
-  #         - ghc:   "9.4"
-  #           cabal: "3.10.2.1"
-  #           cabal_update: "false"
+          - ghc:   "9.4"
+            cabal: "3.10.2.1"
+            cabal_update: "false"
 
-  #         - ghc:   "9.2"
-  #           cabal: "3.10.2.0"
-  #           cabal_update: "false"
+          - ghc:   "9.2"
+            cabal: "3.10.2.0"
+            cabal_update: "false"
 
-  #       # The following tests do not set 'cabal-update', which defaults to 'true' then.
+        # The following tests do not set 'cabal-update', which defaults to 'true' then.
 
-  #       include:
+        include:
 
-  #         # Other macos
+          # Other macos
 
-  #         - os: macos-15-intel
-  #           plan:
-  #             ghc:   latest
-  #             cabal: latest
-  #             cabal_update: "true"
+          - os: macos-15-intel
+            plan:
+              ghc:   latest
+              cabal: latest
+              cabal_update: "true"
 
-  #         - os: macos-14
-  #           plan:
-  #             ghc:   latest
-  #             cabal: latest
-  #             cabal_update: "true"
+          - os: macos-14
+            plan:
+              ghc:   latest
+              cabal: latest
+              cabal_update: "true"
 
-  #         # Some previously recommended releases of ghc with supported cabal
+          # Some previously recommended releases of ghc with supported cabal
 
-  #         - os:  ubuntu-latest
-  #           plan:
-  #             ghc:   "8.10"
-  #             cabal: "3.14.1.1"
+          - os:  ubuntu-latest
+            plan:
+              ghc:   "8.10"
+              cabal: "3.14.1.1"
 
-  #         - os:  ubuntu-latest
-  #           plan:
-  #             ghc:   "8.8"
-  #             cabal: "3.14.1.0"
-  #             # cabal-3.0 install might have the Windows symlinking problem
-  #             # https://github.com/haskell/cabal/issues/5748
+          - os:  ubuntu-latest
+            plan:
+              ghc:   "8.8"
+              cabal: "3.14.1.0"
+              # cabal-3.0 install might have the Windows symlinking problem
+              # https://github.com/haskell/cabal/issues/5748
 
-  #         - os:  ubuntu-latest
-  #           plan:
-  #             ghc:   "8.6"
-  #             cabal: "3.12.1.0"
-  #             cabal_update: "true"
+          - os:  ubuntu-latest
+            plan:
+              ghc:   "8.6"
+              cabal: "3.12.1.0"
+              cabal_update: "true"
 
-  #         # Test on ubuntu-24.04 with older ghc
-  #         - os: ubuntu-24.04
-  #           plan:
-  #             ghc:   "8.0"
-  #             cabal: "3.10.3.0"
-  #             cabal_update: "false"
+          # Test on ubuntu-24.04 with older ghc
+          - os: ubuntu-24.04
+            plan:
+              ghc:   "8.0"
+              cabal: "3.10.3.0"
+              cabal_update: "false"
 
-  #         - os: ubuntu-22.04
-  #           plan:
-  #             ghc:   "8.0"
-  #             cabal: "3.10.2.1"
-  #             cabal_update: "false"
+          - os: ubuntu-22.04
+            plan:
+              ghc:   "8.0"
+              cabal: "3.10.2.1"
+              cabal_update: "false"
 
-  #         # Test some old versions
-  #         - os: ubuntu-latest
-  #           plan:
-  #             ghc:   "8.2.2"
-  #             cabal: "3.10.2.0"
-  #             cabal_update: "false"
+          # Test some old versions
+          - os: ubuntu-latest
+            plan:
+              ghc:   "8.2.2"
+              cabal: "3.10.2.0"
+              cabal_update: "false"
 
-  #         # Test ghcup pre-release channel
-  #         - os: ubuntu-latest
-  #           ghcup_release_channel: "https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-prereleases-0.0.9.yaml"
-  #           plan:
-  #             ghc:   "9.12.1.20250219"
-  #              # 2025-07-29: just not out yet: "9.10.2.20250725"
-  #             cabal: "latest"
+          # Test ghcup pre-release channel
+          - os: ubuntu-latest
+            ghcup_release_channel: "https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-prereleases-0.0.9.yaml"
+            plan:
+              ghc:   "9.12.1.20250219"
+               # 2025-07-29: just not out yet: "9.10.2.20250725"
+              cabal: "latest"
 
-  #         # Test ghc nightly
-  #         - os: ubuntu-latest
-  #           ghcup_release_channel: "https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml"
-  #             # 2025-07-29: 0.0.8 and 0.0.9 do not exist
-  #           plan:
-  #             ghc:   "latest-nightly"
-  #             cabal: "latest"
+          # Test ghc nightly
+          - os: ubuntu-latest
+            ghcup_release_channel: "https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml"
+              # 2025-07-29: 0.0.8 and 0.0.9 do not exist
+            plan:
+              ghc:   "latest-nightly"
+              cabal: "latest"
 
-  #   steps:
-  #     - uses: actions/checkout@v6
+    steps:
+      - uses: actions/checkout@v6
 
-  #     - uses: ./
-  #       id: setup
-  #       with:
-  #         ghc-version: ${{ matrix.plan.ghc }}
-  #         ghcup-release-channel: ${{ matrix.ghcup_release_channel }}
-  #         cabal-version: ${{ matrix.plan.cabal }}
-  #         cabal-update: ${{ matrix.plan.cabal_update }}
+      - uses: ./
+        id: setup
+        with:
+          ghc-version: ${{ matrix.plan.ghc }}
+          ghcup-release-channel: ${{ matrix.ghcup_release_channel }}
+          cabal-version: ${{ matrix.plan.cabal }}
+          cabal-update: ${{ matrix.plan.cabal_update }}
 
-  #     - name: Show installed versions and PATH
-  #       run: |
-  #         cabal --version
-  #         ghc --version
-  #         echo "$PATH"
+      - name: Show installed versions and PATH
+        run: |
+          cabal --version
+          ghc --version
+          echo "$PATH"
 
-  #     - name: Confirm resolved and installed versions match
-  #       shell: bash
-  #       run: |
-  #         CABALVER="$(cabal --numeric-version)"
-  #         GHCVER="$(ghc --numeric-version)"
-  #         echo "CABALVER=${CABALVER}" >> "${GITHUB_ENV}"
-  #         echo "GHCVER=${GHCVER}"     >> "${GITHUB_ENV}"
-  #         if [[ "${{ steps.setup.outputs.ghc-version }}" == "latest-nightly" ]]
-  #         then
-  #           GHCVER_EXPECTED=$( \
-  #             curl "${{ matrix.ghcup_release_channel }}" | \
-  #             yq '.ghcupDownloads.GHC[] | select(.viTags[] | contains("LatestNightly")) | key' \
-  #           )
-  #           echo "Latest nightly: ${GHCVER_EXPECTED}"
-  #         else
-  #           GHCVER_EXPECTED="${{ steps.setup.outputs.ghc-version }}"
-  #         fi
-  #         if [[ "${{ steps.setup.outputs.cabal-version }}" == "head" ]]
-  #         then
-  #           CABALVER_EXPECTED=$( \
-  #             curl --silent https://raw.githubusercontent.com/haskell/cabal/master/cabal-install/cabal-install.cabal | \
-  #             sed -E -n 's/^Version:[[:space:]]+//p' \
-  #           )
-  #           echo "Cabal head: ${CABALVER_EXPECTED}"
-  #         else
-  #           CABALVER_EXPECTED="${{ steps.setup.outputs.cabal-version }}"
-  #         fi
-  #         [[ "${CABALVER_EXPECTED}" == ${CABALVER}* ]] && \
-  #           [[ "${GHCVER}" == "${GHCVER_EXPECTED}" ]]
+      - name: Confirm resolved and installed versions match
+        shell: bash
+        run: |
+          CABALVER="$(cabal --numeric-version)"
+          GHCVER="$(ghc --numeric-version)"
+          echo "CABALVER=${CABALVER}" >> "${GITHUB_ENV}"
+          echo "GHCVER=${GHCVER}"     >> "${GITHUB_ENV}"
+          if [[ "${{ steps.setup.outputs.ghc-version }}" == "latest-nightly" ]]
+          then
+            GHCVER_EXPECTED=$( \
+              curl "${{ matrix.ghcup_release_channel }}" | \
+              yq '.ghcupDownloads.GHC[] | select(.viTags[] | contains("LatestNightly")) | key' \
+            )
+            echo "Latest nightly: ${GHCVER_EXPECTED}"
+          else
+            GHCVER_EXPECTED="${{ steps.setup.outputs.ghc-version }}"
+          fi
+          if [[ "${{ steps.setup.outputs.cabal-version }}" == "head" ]]
+          then
+            CABALVER_EXPECTED=$( \
+              curl --silent https://raw.githubusercontent.com/haskell/cabal/master/cabal-install/cabal-install.cabal | \
+              sed -E -n 's/^Version:[[:space:]]+//p' \
+            )
+            echo "Cabal head: ${CABALVER_EXPECTED}"
+          else
+            CABALVER_EXPECTED="${{ steps.setup.outputs.cabal-version }}"
+          fi
+          [[ "${CABALVER_EXPECTED}" == ${CABALVER}* ]] && \
+            [[ "${GHCVER}" == "${GHCVER_EXPECTED}" ]]
 
-  #     - name: Test runghc
-  #       run: |
-  #         runghc --version
-  #         runghc __tests__/hello.hs
+      - name: Test runghc
+        run: |
+          runghc --version
+          runghc __tests__/hello.hs
 
-  #     - name: Build test project
-  #       working-directory: __tests__/project
-  #       run: cabal build
+      - name: Build test project
+        working-directory: __tests__/project
+        run: cabal build
 
-  #     - name: Run test project
-  #       working-directory: __tests__/project
-  #       run: cabal run
+      - name: Run test project
+        working-directory: __tests__/project
+        run: cabal run
 
-  #     - name: Install test project
-  #       working-directory: __tests__/project
-  #       run: cabal install
+      - name: Install test project
+        working-directory: __tests__/project
+        run: cabal install
 
-  #     - name: Run installed test project
-  #       run: hello-haskell-setup
-  #       # This tests whether the default installdir has been added to the PATH (issue #130).
+      - name: Run installed test project
+        run: hello-haskell-setup
+        # This tests whether the default installdir has been added to the PATH (issue #130).
 
-  #     - name: Build and run test with Hackage dependency
-  #       if:   ${{ matrix.plan.cabal_update != 'false' }}
-  #       working-directory: __tests__/project-with-hackage-dependency
-  #       run:  cabal build && cabal run
+      - name: Build and run test with Hackage dependency
+        if:   ${{ matrix.plan.cabal_update != 'false' }}
+        working-directory: __tests__/project-with-hackage-dependency
+        run:  cabal build && cabal run
 
-  #     - name: Confirm installed and expected versions match
-  #       shell: bash
-  #       # check that if given in the matrix, the actual version matches:
-  #       # - cabal: major version
-  #       # - ghc: major and minor version
-  #       # pure bash startsWith
-  #       run: |
-  #         if [[ "${{ matrix.plan.cabal }}" =~ ^([0-9]+\.[0-9]+) ]]; then cabalmajor="${BASH_REMATCH[1]}"; fi
-  #         if [[ "${{ matrix.plan.ghc }}" =~ ^([0-9]+\.[0-9]+) ]]; then ghcmajor="${BASH_REMATCH[1]}"; fi
-  #         if [[ "${{ matrix.plan.ghc }}" =~ ^([0-9]+\.[0-9]+\.[0-9]+) ]]; then ghcver="${BASH_REMATCH[1]}"; fi
-  #         [[ "${CABALVER}" =~ ^"${cabalmajor}" ]] && [[ "${GHCVER}" =~ ^"${ghcmajor}" ]] && [[ "${GHCVER}" =~ ^"${ghcver}" ]]
+      - name: Confirm installed and expected versions match
+        shell: bash
+        # check that if given in the matrix, the actual version matches:
+        # - cabal: major version
+        # - ghc: major and minor version
+        # pure bash startsWith
+        run: |
+          if [[ "${{ matrix.plan.cabal }}" =~ ^([0-9]+\.[0-9]+) ]]; then cabalmajor="${BASH_REMATCH[1]}"; fi
+          if [[ "${{ matrix.plan.ghc }}" =~ ^([0-9]+\.[0-9]+) ]]; then ghcmajor="${BASH_REMATCH[1]}"; fi
+          if [[ "${{ matrix.plan.ghc }}" =~ ^([0-9]+\.[0-9]+\.[0-9]+) ]]; then ghcver="${BASH_REMATCH[1]}"; fi
+          [[ "${CABALVER}" =~ ^"${cabalmajor}" ]] && [[ "${GHCVER}" =~ ^"${ghcmajor}" ]] && [[ "${GHCVER}" =~ ^"${ghcver}" ]]
 
-  # test-fallback:
-  #   name: Test GHC Installation Fallbacks - ${{ matrix.os }}
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     matrix:
-  #       os: [ubuntu-latest, macOS-latest, windows-latest]
-  #   steps:
-  #     - uses: actions/checkout@v6
-  #     - uses: ./
-  #       id: setup
-  #       env:
-  #         RUNNER_DEBUG: "1"
-  #       with:
-  #         ghc-version: 8.21.5
-  #     - name: Error on success
-  #       if: steps.setup.outputs.failed != 'true'
-  #         # NB: 'failed' is an undeclared output of the setup action, used in debug mode
-  #       run: |
-  #         echo "Error: ghc 8.21.5 didn't fail to install"
+  test-fallback:
+    name: Test GHC Installation Fallbacks - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./
+        id: setup
+        env:
+          RUNNER_DEBUG: "1"
+        with:
+          ghc-version: 8.21.5
+      - name: Error on success
+        if: steps.setup.outputs.failed != 'true'
+          # NB: 'failed' is an undeclared output of the setup action, used in debug mode
+        run: |
+          echo "Error: ghc 8.21.5 didn't fail to install"
 
-  # install-stack:
-  #   name: Stack ${{ matrix.stack }} ${{ matrix.os }}
-  #   runs-on: ${{ matrix.os }}
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: [ubuntu-latest, macOS-latest, windows-latest]
-  #       stack: ["latest", "3.3.1"]
-  #         # test latest and recommended version of stack
+  install-stack:
+    name: Stack ${{ matrix.stack }} ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        stack: ["latest", "3.3.1"]
+          # test latest and recommended version of stack
 
-  #   steps:
-  #     - uses: actions/checkout@v6
+    steps:
+      - uses: actions/checkout@v6
 
-  #     - uses: ./
-  #       id: setup
-  #       with:
-  #         enable-stack: true
-  #         stack-no-global: true
-  #         stack-version: ${{ matrix.stack }}
+      - uses: ./
+        id: setup
+        with:
+          enable-stack: true
+          stack-no-global: true
+          stack-version: ${{ matrix.stack }}
 
-  #     - run: |
-  #         stack --version
-  #         stack --help
+      - run: |
+          stack --version
+          stack --help
 
-  #     - name: Checking if returned stack-root output is correct
-  #       shell: bash
-  #         # NB: we invoke `stack path` twice, because the first time it
-  #         # might install things (like MSYS2 on Windows) which clobber the output.
-  #       run: |
-  #         stack path --system-ghc --stack-root
-  #         expected_stack_root=$(stack path --system-ghc --stack-root)
+      - name: Checking if returned stack-root output is correct
+        shell: bash
+          # NB: we invoke `stack path` twice, because the first time it
+          # might install things (like MSYS2 on Windows) which clobber the output.
+        run: |
+          stack path --system-ghc --stack-root
+          expected_stack_root=$(stack path --system-ghc --stack-root)
 
-  #         if [ "${expected_stack_root}" != "${{ steps.setup.outputs.stack-root }}" ]; then
-  #           echo "Stack-root does not match expected value"
-  #           echo "Expected stack-root: ${expected_stack_root}"
-  #           echo "Returned stack-root: ${{ steps.setup.outputs.stack-root }}"
-  #           exit 1
-  #         fi
+          if [ "${expected_stack_root}" != "${{ steps.setup.outputs.stack-root }}" ]; then
+            echo "Stack-root does not match expected value"
+            echo "Expected stack-root: ${expected_stack_root}"
+            echo "Returned stack-root: ${{ steps.setup.outputs.stack-root }}"
+            exit 1
+          fi
 
 
   # Test architecture ia32, see https://github.com/haskell-actions/setup/issues/130
+  #################################################################################
   #
   # From https://github.com/0rphee/cripto_final/actions/runs/20246908790/workflow
   # https://github.com/0rphee/cripto_final/commit/403d115a61e4c6f960bf230e3b9149e1dee0c781
+  #
   ia32:
     runs-on: ubuntu-latest
     container:
       image: 'i386/alpine:3.19'
       volumes:
         - /tmp:/__e/node24_alpine
-        # - /tmp:/__e/node20_alpine
     permissions:
       contents: read
     steps:
@@ -332,10 +333,6 @@ jobs:
           ln -sf "$(which node)" /__e/node24_alpine/bin/node
           ln -sf "$(which npm)" /__e/node24_alpine/bin/npm
           ln -sf "$(which npx)" /__e/node24_alpine/bin/npx
-          # mkdir -p /__e/node20_alpine/bin
-          # ln -sf "$(which node)" /__e/node20_alpine/bin/node
-          # ln -sf "$(which npm)" /__e/node20_alpine/bin/npm
-          # ln -sf "$(which npx)" /__e/node20_alpine/bin/npx
 
       - uses: actions/checkout@v6
 
@@ -343,7 +340,9 @@ jobs:
         with:
           ghc-version: latest
           cabal-version: latest
-          # enable-stack: 'false'
+
+      # Copy of steps from main job
+      ############################################################
 
       - name: Show installed versions and PATH
         run: |
