@@ -35191,6 +35191,22 @@ async function resetTool(tool, _version, os, arch) {
             return;
     }
 }
+async function ghcupArchString(arch) {
+    switch (arch) {
+        case 'arm64':
+            return Promise.resolve('aarch64');
+        case 'x64':
+            return Promise.resolve('x86_64');
+        case 'arm':
+            return Promise.resolve('armv7');
+        case 'ia32':
+            return Promise.resolve('i386');
+        default:
+            const err = `Unsupported architecture: ${arch}`;
+            core.error(err);
+            return Promise.reject(err);
+    }
+}
 async function stackArchString(arch) {
     switch (arch) {
         case 'arm64':
@@ -35272,7 +35288,7 @@ async function ghcupBin(os, arch) {
     const cachedBin = tc.find('ghcup', opts_1.ghcup_version);
     if (cachedBin)
         return (0, path_1.join)(cachedBin, 'ghcup');
-    const binArch = await stackArchString(arch);
+    const binArch = await ghcupArchString(arch);
     const bin = await tc.downloadTool(`https://downloads.haskell.org/ghcup/${opts_1.ghcup_version}/${binArch}-${os === 'darwin' ? 'apple-darwin' : 'linux'}-ghcup-${opts_1.ghcup_version}`);
     await fs_1.promises.chmod(bin, 0o755);
     return (0, path_1.join)(await tc.cacheFile(bin, 'ghcup', 'ghcup', opts_1.ghcup_version), 'ghcup');
@@ -35510,11 +35526,11 @@ function resolve(version, supported, tool, os, verbose // If resolution isn't th
 ) {
     const result = version === 'latest'
         ? supported[0]
-        : supported.find(v => v === version) ??
+        : (supported.find(v => v === version) ??
             supported.find(v => v.startsWith(version + '.')) ??
             // Andreas, 2023-05-19, issue #248
             // Append "." so that eg stack "2.1" resolves to "2.1.3" and not "2.11.1".
-            version;
+            version);
     // Andreas 2022-12-29, issue #144: inform about resolution here where we can also output ${tool}.
     if (verbose === true && version !== result)
         core.info(`Resolved ${tool} ${version} to ${result}`);

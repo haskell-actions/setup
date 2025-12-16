@@ -14,7 +14,7 @@ export type Revisions = Record<
   Record<Tool, Array<{from: string; to: string}>>
 >;
 export type OS = 'linux' | 'darwin' | 'win32';
-export type Arch = 'arm64' | 'x64';
+export type Arch = 'arm64' | 'x64' | 'arm' | 'ia32';
 export type Tool = 'cabal' | 'ghc' | 'stack';
 
 export interface ProgramOpt {
@@ -98,11 +98,11 @@ function resolve(
   const result =
     version === 'latest'
       ? supported[0]
-      : supported.find(v => v === version) ??
+      : (supported.find(v => v === version) ??
         supported.find(v => v.startsWith(version + '.')) ??
         // Andreas, 2023-05-19, issue #248
         // Append "." so that eg stack "2.1" resolves to "2.1.3" and not "2.11.1".
-        version;
+        version);
   // Andreas 2022-12-29, issue #144: inform about resolution here where we can also output ${tool}.
   if (verbose === true && version !== result)
     core.info(`Resolved ${tool} ${version} to ${result}`);

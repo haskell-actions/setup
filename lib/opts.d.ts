@@ -6,7 +6,7 @@ export type Revisions = Record<OS, Record<Tool, Array<{
     to: string;
 }>>>;
 export type OS = 'linux' | 'darwin' | 'win32';
-export type Arch = 'arm64' | 'x64';
+export type Arch = 'arm64' | 'x64' | 'arm' | 'ia32';
 export type Tool = 'cabal' | 'ghc' | 'stack';
 export interface ProgramOpt {
     enable: boolean;
