@@ -221,6 +221,23 @@ export async function resetTool(
   }
 }
 
+async function ghcupArchString(arch: Arch): Promise<string> {
+  switch (arch) {
+    case 'arm64':
+      return Promise.resolve('aarch64');
+    case 'x64':
+      return Promise.resolve('x86_64');
+    case 'arm':
+      return Promise.resolve('armv7');
+    case 'ia32':
+      return Promise.resolve('i386');
+    default:
+      const err = `Unsupported architecture: ${arch}`;
+      core.error(err);
+      return Promise.reject(err);
+  }
+}
+
 async function stackArchString(arch: Arch): Promise<string> {
   switch (arch) {
     case 'arm64':
@@ -323,7 +340,7 @@ async function ghcupBin(os: OS, arch: Arch): Promise<string> {
   const cachedBin = tc.find('ghcup', ghcup_version);
   if (cachedBin) return join(cachedBin, 'ghcup');
 
-  const binArch = await stackArchString(arch);
+  const binArch = await ghcupArchString(arch);
   const bin = await tc.downloadTool(
     `https://downloads.haskell.org/ghcup/${ghcup_version}/${binArch}-${
       os === 'darwin' ? 'apple-darwin' : 'linux'

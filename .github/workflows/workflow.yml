@@ -15,6 +15,7 @@ defaults:
     shell: bash
 
 jobs:
+
   test:
     name: Unit Tests - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -301,3 +302,75 @@ jobs:
             echo "Returned stack-root: ${{ steps.setup.outputs.stack-root }}"
             exit 1
           fi
+
+
+  # Test architecture ia32, see https://github.com/haskell-actions/setup/issues/130
+  #################################################################################
+  #
+  # From https://github.com/0rphee/cripto_final/actions/runs/20246908790/workflow
+  # https://github.com/0rphee/cripto_final/commit/403d115a61e4c6f960bf230e3b9149e1dee0c781
+  #
+  ia32:
+    runs-on: ubuntu-latest
+    container:
+      image: 'i386/alpine:3.19'
+      volumes:
+        - /tmp:/__e/node24_alpine
+    permissions:
+      contents: read
+    steps:
+
+      - name: Install system dependencies (Alpine)
+        shell: sh
+        run: |
+          apk update
+          apk add curl gcc g++ git gmp-dev libc-dev libffi-dev make musl-dev ncurses-dev perl tar xz bash
+
+      - name: Install node for actions/checkout
+        run: |
+          apk add nodejs npm
+          mkdir -p /__e/node24_alpine/bin
+          ln -sf "$(which node)" /__e/node24_alpine/bin/node
+          ln -sf "$(which npm)" /__e/node24_alpine/bin/npm
+          ln -sf "$(which npx)" /__e/node24_alpine/bin/npx
+
+      - uses: actions/checkout@v6
+
+      - uses: ./
+        with:
+          ghc-version: latest
+          cabal-version: latest
+
+      # Copy of steps from main job
+      ############################################################
+
+      - name: Show installed versions and PATH
+        run: |
+          cabal --version
+          ghc --version
+          echo "$PATH"
+
+      - name: Test runghc
+        run: |
+          runghc --version
+          runghc __tests__/hello.hs
+
+      - name: Build test project
+        working-directory: __tests__/project
+        run: cabal build
+
+      - name: Run test project
+        working-directory: __tests__/project
+        run: cabal run
+
+      - name: Install test project
+        working-directory: __tests__/project
+        run: cabal install
+
+      - name: Run installed test project
+        run: hello-haskell-setup
+        # This tests whether the default installdir has been added to the PATH (issue #130).
+
+      - name: Build and run test with Hackage dependency
+        working-directory: __tests__/project-with-hackage-dependency
+        run:  cabal build && cabal run
