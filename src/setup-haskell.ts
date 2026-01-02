@@ -40,16 +40,14 @@ export default async function run(
     core.debug(`run: os     = ${JSON.stringify(os)}`);
     core.debug(`run: opts   = ${JSON.stringify(opts)}`);
 
-    // Andreas Abel, 2026-01-01, https://github.com/haskell-actions/setup/issues/78
-    // Add ghcup vanilla and prereleases channels by default.
-    addGhcupReleaseChannel('vanilla', os, arch);
-    addGhcupReleaseChannel('prereleases', os, arch);
-
-    if (opts.ghcup.releaseChannel) {
-      await core.group(`Preparing ghcup environment`, async () =>
-        addGhcupReleaseChannel(opts.ghcup.releaseChannel!.toString(), os, arch)
-      );
-    }
+    await core.group(`Preparing ghcup environment`, async () => {
+      // Andreas Abel, 2026-01-01, https://github.com/haskell-actions/setup/issues/78
+      // Add ghcup vanilla and prereleases channels by default.
+      addGhcupReleaseChannel('vanilla', os, arch);
+      addGhcupReleaseChannel('prereleases', os, arch);
+      if (opts.ghcup.releaseChannel)
+        addGhcupReleaseChannel(opts.ghcup.releaseChannel.toString(), os, arch);
+    });
 
     for (const [t, {resolved}] of Object.entries(opts).filter(
       o => o[1].enable
