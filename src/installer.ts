@@ -354,13 +354,13 @@ async function ghcupBin(os: OS, arch: Arch): Promise<string> {
 }
 
 export async function addGhcupReleaseChannel(
-  channel: URL,
+  channel: string,
   os: OS,
   arch: Arch
 ): Promise<void> {
   core.info(`Adding ghcup release channel: ${channel}`);
   const bin = await ghcupBin(os, arch);
-  await exec(bin, ['config', 'add-release-channel', channel.toString()]);
+  await exec(bin, ['config', 'add-release-channel', channel]);
 }
 
 async function ghcup(

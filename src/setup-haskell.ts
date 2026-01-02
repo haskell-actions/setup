@@ -40,9 +40,14 @@ export default async function run(
     core.debug(`run: os     = ${JSON.stringify(os)}`);
     core.debug(`run: opts   = ${JSON.stringify(opts)}`);
 
+    // Andreas Abel, 2026-01-01, https://github.com/haskell-actions/setup/issues/78
+    // Add ghcup vanilla and prereleases channels by default.
+    addGhcupReleaseChannel('vanilla', os, arch);
+    addGhcupReleaseChannel('prereleases', os, arch);
+
     if (opts.ghcup.releaseChannel) {
       await core.group(`Preparing ghcup environment`, async () =>
-        addGhcupReleaseChannel(opts.ghcup.releaseChannel!, os, arch)
+        addGhcupReleaseChannel(opts.ghcup.releaseChannel!.toString(), os, arch)
       );
     }
 
