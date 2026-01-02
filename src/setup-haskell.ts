@@ -43,10 +43,14 @@ export default async function run(
     await core.group(`Preparing ghcup environment`, async () => {
       // Andreas Abel, 2026-01-01, https://github.com/haskell-actions/setup/issues/78
       // Add ghcup vanilla and prereleases channels by default.
-      addGhcupReleaseChannel('vanilla', os, arch);
-      addGhcupReleaseChannel('prereleases', os, arch);
+      await addGhcupReleaseChannel('vanilla', os, arch);
+      await addGhcupReleaseChannel('prereleases', os, arch);
       if (opts.ghcup.releaseChannel)
-        addGhcupReleaseChannel(opts.ghcup.releaseChannel.toString(), os, arch);
+        await addGhcupReleaseChannel(
+          opts.ghcup.releaseChannel.toString(),
+          os,
+          arch
+        );
     });
 
     for (const [t, {resolved}] of Object.entries(opts).filter(
