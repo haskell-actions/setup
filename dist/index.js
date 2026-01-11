@@ -35718,7 +35718,14 @@ async function run(inputs) {
         await core.group(`Preparing ghcup environment`, async () => {
             // Andreas Abel, 2026-01-01, https://github.com/haskell-actions/setup/issues/78
             // Add ghcup vanilla and prereleases channels by default.
-            await (0, installer_1.addGhcupReleaseChannel)('vanilla', os, arch);
+            // Andreas Abel, 2026-01-11, https://github.com/haskell-actions/setup/issues/136
+            // There are reasons not to include the vanilla channel by default:
+            // mpickering write:
+            // the "vanilla" channel is the bindists "as released by GHC upstream",
+            // which is a change from the default, which provides curated bindists.
+            // In particular on the cabal repo this meant a 9.0.2 bindist without
+            // profiling libraries was downloaded by CI and caused a test to fail.
+            // await addGhcupReleaseChannel('vanilla', os, arch);
             await (0, installer_1.addGhcupReleaseChannel)('prereleases', os, arch);
             if (opts.ghcup.releaseChannel)
                 await (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel.toString(), os, arch);
