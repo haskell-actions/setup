@@ -154,6 +154,7 @@ Recommendation: Use the latest available version if possible.
 **Stack:** (with `enable-stack: true`)
 
 - `latest` (default, recommended)
+- `3.9.1` `3.9`
 - `3.7.1` `3.7`
 - `3.5.1` `3.5`
 - `3.3.1` `3.3`
