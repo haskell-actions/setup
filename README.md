@@ -130,6 +130,7 @@ E.g., `8.10` will be resolved to `8.10.7`, and so will `8`.
 - `8.4.1`
 - `8.2.2` `8.2`
 - `8.0.2` `8.0`
+- `7.10.3` `7.10`
 
 Suggestion: Try to support at least the three latest major versions of GHC.
 
@@ -175,12 +176,12 @@ Recommendation: Use the latest available version if possible.
 - `2.3.1`
 - `2.1.3` `2.1`
 - `2.1.1`
-- `1.9.3.1` `1.9`
-- `1.9.1.1`
+- `1.9.3` `1.9`
+- `1.9.1`
 - `1.7.1` `1.7`
 - `1.6.5` `1.6`
-- `1.6.3.1`
-- `1.6.1.1`
+- `1.6.3`
+- `1.6.1`
 - `1.5.1` `1.5`
 - `1.5.0`
 - `1.4.0` `1.4`
