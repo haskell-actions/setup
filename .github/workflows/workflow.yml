@@ -23,7 +23,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
@@ -160,7 +160,7 @@ jobs:
               cabal: "latest"
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./
         id: setup
@@ -251,7 +251,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./
         id: setup
         env:
@@ -275,7 +275,7 @@ jobs:
           # test latest and recommended version of stack
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./
         id: setup
@@ -334,7 +334,7 @@ jobs:
           ln -sf "$(which npm)" /__e/node24_alpine/bin/npm
           ln -sf "$(which npx)" /__e/node24_alpine/bin/npx
 
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./
         with:
