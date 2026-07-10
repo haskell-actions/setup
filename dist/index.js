@@ -35575,10 +35575,10 @@ function parseURL(name, val) {
 }
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
-    const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
-    const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
-    const stackEnable = (inputs['enable-stack'] || '') !== '';
-    const matcherDisable = (inputs['disable-matcher'] || '') !== '';
+    const stackNoGlobal = parseYAMLBoolean('stack-no-global', inputs['stack-no-global'] || 'false');
+    const stackSetupGhc = parseYAMLBoolean('stack-setup-ghc', inputs['stack-setup-ghc'] || 'false');
+    const stackEnable = parseYAMLBoolean('enable-stack', inputs['enable-stack'] || 'false');
+    const matcherDisable = parseYAMLBoolean('disable-matcher', inputs['disable-matcher'] || 'false');
     const ghcupReleaseChannel = parseURL('ghcup-release-channel', inputs['ghcup-release-channel'] || '');
     // Andreas, 2023-01-05, issue #29:
     // 'cabal-update' has a default value, so we should get a proper boolean always.
