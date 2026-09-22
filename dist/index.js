@@ -35579,7 +35579,7 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
     const stackSetupGhc = parseYAMLBoolean('stack-setup-ghc', inputs['stack-setup-ghc'] || 'false');
     const stackEnable = parseYAMLBoolean('enable-stack', inputs['enable-stack'] || 'false');
     const matcherDisable = parseYAMLBoolean('disable-matcher', inputs['disable-matcher'] || 'false');
-    const ghcupReleaseChannel = parseURL('ghcup-release-channel', inputs['ghcup-release-channel'] || '');
+    const ghcupReleaseChannel = inputs['ghcup-release-channel'];
     // Andreas, 2023-01-05, issue #29:
     // 'cabal-update' has a default value, so we should get a proper boolean always.
     // Andreas, 2023-01-06: This is not true if we use the action as a library.
@@ -35728,7 +35728,7 @@ async function run(inputs) {
             // await addGhcupReleaseChannel('vanilla', os, arch);
             await (0, installer_1.addGhcupReleaseChannel)('prereleases', os, arch);
             if (opts.ghcup.releaseChannel)
-                await (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel.toString(), os, arch);
+                await (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel, os, arch);
         });
         for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable)) {
             await core.group(`Preparing ${t} environment`, async () => (0, installer_1.resetTool)(t, resolved, os, arch));

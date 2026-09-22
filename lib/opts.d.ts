@@ -16,7 +16,7 @@ export interface ProgramOpt {
 export interface Options {
     ghc: ProgramOpt;
     ghcup: {
-        releaseChannel?: URL;
+        releaseChannel?: string;
     };
     cabal: ProgramOpt & {
         update: boolean;

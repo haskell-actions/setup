@@ -25,7 +25,7 @@ export interface ProgramOpt {
 
 export interface Options {
   ghc: ProgramOpt;
-  ghcup: {releaseChannel?: URL};
+  ghcup: {releaseChannel?: string};
   cabal: ProgramOpt & {update: boolean};
   stack: ProgramOpt & {setup: boolean};
   general: {matcher: {enable: boolean}};
@@ -170,10 +170,7 @@ export function getOpts(
     'disable-matcher',
     inputs['disable-matcher'] || 'false'
   );
-  const ghcupReleaseChannel = parseURL(
-    'ghcup-release-channel',
-    inputs['ghcup-release-channel'] || ''
-  );
+  const ghcupReleaseChannel = inputs['ghcup-release-channel'];
   // Andreas, 2023-01-05, issue #29:
   // 'cabal-update' has a default value, so we should get a proper boolean always.
   // Andreas, 2023-01-06: This is not true if we use the action as a library.
