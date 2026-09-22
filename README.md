@@ -22,15 +22,15 @@ See [action.yml](action.yml) and [docs/examples.md](docs/examples.md).
 
 | Name                    | Description                                                                                                                                 | Type      | Default     |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------- |
-| `ghc-version`           | GHC version to use, e.g. `9.2` or `9.2.5`.                                                                                                  | `string`  | `latest`    |
-| `cabal-version`         | Cabal version to use, e.g. `3.6`.                                                                                                           | `string`  | `latest`    |
+| `ghc-version`           | GHC version to use, e.g. `9.12` or `9.12.4`.                                                                                                | `string`  | `latest`    |
+| `cabal-version`         | Cabal version to use, e.g. `3.14`.                                                                                                          | `string`  | `latest`    |
 | `stack-version`         | Stack version to use, e.g. `latest`. Stack will only be installed if `enable-stack` is set.                                                 | `string`  | `latest`    |
 | `enable-stack`          | If set, will setup Stack.                                                                                                                   | "boolean" | false/unset |
 | `stack-no-global`       | If set, `enable-stack` must be set. Prevents installing GHC and Cabal globally.                                                             | "boolean" | false/unset |
 | `stack-setup-ghc`       | If set, `enable-stack` must be set. Runs stack setup to install the specified GHC. (Note: setting this does _not_ imply `stack-no-global`.) | "boolean" | false/unset |
 | `disable-matcher`       | If set, disables match messages from GHC as GitHub CI annotations.                                                                          | "boolean" | false/unset |
 | `cabal-update`          | If set to `false`, skip `cabal update` step.                                                                                                | `boolean` | `true`      |
-| `ghcup-release-channel` | If set, add a [release channel](https://www.haskell.org/ghcup/guide/#metadata) to ghcup.                                                    | `URL`     | none        |
+| `ghcup-release-channel` | If set, add a [release channel](https://www.haskell.org/ghcup/guide/channels/) to ghcup.                                                    | `URL`     | none        |
 
 Note: "boolean" types are set/unset, not true/false.
 That is, setting any "boolean" to a value other than the empty string (`""`) will be considered true/set.
@@ -138,6 +138,7 @@ Suggestion: Try to support at least the three latest major versions of GHC.
 
 - `head` (the [cabal-head](https://github.com/haskell/cabal/releases/tag/cabal-head) release of the most recent build of the `master` branch)
 - `latest` (default, recommended)
+- `3.18.1.0` `3.18`
 - `3.16.1.0` `3.16`
 - `3.16.0.0`
 - `3.14.2.0` `3.14`
@@ -155,6 +156,7 @@ Recommendation: Use the latest available version if possible.
 **Stack:** (with `enable-stack: true`)
 
 - `latest` (default, recommended)
+- `3.11.1` `3.11`
 - `3.9.3` `3.9`
 - `3.9.1`
 - `3.7.1` `3.7`
