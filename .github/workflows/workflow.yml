@@ -143,18 +143,25 @@ jobs:
               cabal: "3.10.2.0"
               cabal_update: "false"
 
-          # Test ghcup pre-release channel
+          # Test ghcup pre-release channel with symbolic name (issue #152)
           - os: ubuntu-latest
-            ghcup_release_channel: "https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-prereleases-0.0.9.yaml"
+            ghcup_release_channel: "prereleases"
             plan:
-              ghc:   "9.12.1.20250219"
-               # 2025-07-29: just not out yet: "9.10.2.20250725"
+              ghc:   "10.0.0.20260917"
+              cabal: "latest"
+
+          # Test ghcup pre-release channel with URL
+          - os: ubuntu-latest
+            ghcup_release_channel: "https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-prereleases-0.1.0.yaml"
+            plan:
+              ghc:   "9.14.1.20260916"
               cabal: "latest"
 
           # Test ghc nightly
           - os: ubuntu-latest
             ghcup_release_channel: "https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml"
               # 2025-07-29: 0.0.8 and 0.0.9 do not exist
+              # 2026-09-22: neither 0.1.0
             plan:
               ghc:   "latest-nightly"
               cabal: "latest"

@@ -53,11 +53,7 @@ export default async function run(
       // await addGhcupReleaseChannel('vanilla', os, arch);
       await addGhcupReleaseChannel('prereleases', os, arch);
       if (opts.ghcup.releaseChannel)
-        await addGhcupReleaseChannel(
-          opts.ghcup.releaseChannel.toString(),
-          os,
-          arch
-        );
+        await addGhcupReleaseChannel(opts.ghcup.releaseChannel, os, arch);
     });
 
     for (const [t, {resolved}] of Object.entries(opts).filter(
