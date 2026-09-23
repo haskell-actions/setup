@@ -79,6 +79,37 @@ jobs:
       - run: runhaskell Hello.hs
 ```
 
+### Basic generic matrix with caching
+```
+name: build
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc: ['9.14', '9.12', '9.10', '9.8', '9.6', '9.4', '9.2']
+    name: Haskell GHC ${{ matrix.ghc }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: haskell-actions/setup@v2
+        with:
+          ghc-version: ${{ matrix.ghc }}
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.cabal
+            dist-newstyle
+          key: ${{ runner.os }}-${{ matrix.ghc }}-${{ hashFiles('**/*.cabal','**/cabal.project') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ matrix.ghc }}-
+            ${{ runner.os }}-
+      - run: cabal update
+      - run: cabal build
+      - run: cabal haddock
+      - run: cabal sdist
+```
+
 ### Multiple GHC versions
 
 If you need multiple versions of GHC installed at the same time, it is possible
