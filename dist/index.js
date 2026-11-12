@@ -35124,6 +35124,19 @@ async function isInstalled(tool, version, os, arch) {
     return false;
 }
 async function installTool(tool, version, os, arch) {
+    // GHC < 9.6 bindists ship an hsc2hs wrapper with a hardcoded
+    // "--lflag=-fuse-ld=gold", so ld.gold has to be present whenever hsc2hs
+    // runs, even if GHC itself is already installed (preinstalled or cached).
+    // Hence, do this before the isInstalled check.
+    // “version” may not be a semantic version (e.g. “latest-nightly”),
+    // so guard “compareVersions” with “validate”.
+    if (os === 'linux' &&
+        tool === 'ghc' &&
+        (0, compare_versions_1.validate)(version) &&
+        (0, compare_versions_1.compareVersions)(version, '9.6') < 0 // meaning version < 9.6
+    ) {
+        await aptBinutilsGold();
+    }
     if (await isInstalled(tool, version, os, arch))
         return;
     warn(tool, version);
@@ -35239,6 +35252,27 @@ async function stack(version, os, arch) {
 async function aptBuildEssential() {
     core.info(`Installing build-essential using apt-get (for ghc-head)`);
     const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install build-essential"`);
+    return returnCode === 0;
+}
+async function aptBinutilsGold() {
+    // Up to ubuntu-24.04, ld.gold is part of binutils. Since binutils 2.44
+    // deprecated gold, ubuntu-25.10 and later ship it in a separate
+    // binutils-gold package instead.
+    if (await (0, io_1.which)('ld.gold', false)) {
+        core.debug('ld.gold is already installed');
+        return true;
+    }
+    if (!(await (0, io_1.which)('apt-get', false))) {
+        core.warning('ld.gold not found and apt-get is unavailable; hsc2hs of ghc < 9.6 may fail to link');
+        return false;
+    }
+    core.info(`Installing binutils-gold using apt-get (for ghc < 9.6)`);
+    // exec throws (instead of returning non-zero) if e.g. sudo is not
+    // available; this must not fail the action, as hsc2hs may not be needed.
+    const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install binutils-gold"`).catch(() => -1);
+    if (returnCode !== 0) {
+        core.warning('Failed to install binutils-gold; hsc2hs of ghc < 9.6 may fail to link');
+    }
     return returnCode === 0;
 }
 async function aptLibNCurses5() {
